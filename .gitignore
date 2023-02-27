@@ -1,0 +1,4 @@
+.idea
+arm-gnu-toolchain*
+build
+kernel*.img
