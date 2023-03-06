@@ -5,14 +5,14 @@ DEBUG ?= 1 # set to 1 to enable debug info & define DEBUG macro
 ifeq ($(strip $(RASPPI)), 3)
 	TARGET_CPU  = cortex-a53
 	KERNEL 	    = kernel8
-	INITADDR	= 0x80000
+	INITADDR    = 0x80000
 	QEMU_FLAGS += -M raspi3b -nographic #-no-reboot
 	QEMU_FLAGS += -monitor telnet:127.0.0.1:1235,server,nowait
 else
 	ifeq ($(strip $(RASPPI)), 4)
 		TARGET_CPU = cortex-a72
 		KERNEL 	   = kernel8-rpi4
-		INITADDR	= 0x80000
+		INITADDR   = 0x80000
 	else # not supported
 		TARGET_CPU =
 		KERNEL 	   = kernel7
@@ -125,8 +125,8 @@ qemu-gdb: $(KERNEL).img
 
 clean:
 	@echo "  CLEAN $(BUILD_DIR)"
-	@echo "  CLEAN $(TARGET).img"
-	@rm -rf $(BUILD_DIR) $(TARGET).img
+	@echo "  CLEAN $(KERNEL).img"
+	@rm -rf $(BUILD_DIR) $(KERNEL).img
 
 
 .PHONY: qemu qemu-gdb clean all
