@@ -96,7 +96,7 @@ EL1setup:
 	adrp	x2, bss_end
 	add     x2, x2, :lo12:bss_end
 	sub	x2, x2, x0
-	bl 	__memset_aarch64
+	bl 	memset
 
         /* set up core 0 main kernel stack */
         ldr     x0, =MEM_KERNEL_STACK

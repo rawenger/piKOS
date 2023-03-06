@@ -1,6 +1,8 @@
 //
 // memorymap.h
 //
+// piKOS: a minimal OS for Raspberry Pi 3 & 4
+//
 // Memory addresses and sizes (for AArch64)
 //
 // Parts of this file are adapted from Circle - A C++ bare metal environment for Raspberry Pi
@@ -24,7 +26,7 @@
 
 #ifndef MEGABYTE
 
-#define MEGABYTE	0x100000
+#define MEGABYTE	0x100000U
 #endif
 #ifndef GIGABYTE
 #define GIGABYTE	0x40000000UL
@@ -38,13 +40,13 @@
 #define GPU_MEM_SIZE		(64 * MEGABYTE)			// set in config.txt
 #define ARM_MEM_SIZE		(MEM_SIZE - GPU_MEM_SIZE)	// normally overwritten
 
-#define PAGE_SIZE		0x10000				// page size used by us
+#define PAGE_SIZE		0x1000				// page size used by us
 
-#define KERNEL_STACK_SIZE	0x20000
-#define EXCEPTION_STACK_SIZE	0x8000
+#define KERNEL_STACK_SIZE	0x20000U
+#define EXCEPTION_STACK_SIZE	0x8000U
 #define PAGE_RESERVE		(16 * MEGABYTE)
 
-#define MEM_KERNEL_START	0x80000					// main code starts here
+#define MEM_KERNEL_START	0x80000U				// main code starts here
 #define MEM_KERNEL_END		(MEM_KERNEL_START + KERNEL_MAX_SIZE)
 #define MEM_KERNEL_STACK	(MEM_KERNEL_END + KERNEL_STACK_SIZE)	// expands down
 #define MEM_EXCEPTION_STACK	(MEM_KERNEL_STACK + KERNEL_STACK_SIZE * (CORES-1) + EXCEPTION_STACK_SIZE)
@@ -55,6 +57,7 @@
 #define MEM_COHERENT_REGION	((MEM_EXCEPTION_STACK_END + 2*MEGABYTE) & ~(MEGABYTE-1))
 
 #define MEM_HEAP_START		(MEM_COHERENT_REGION + MEGABYTE)
+#define MEM_HEAP_MAXSIZE        (MEM_HEAP_START + 4 * MEGABYTE) // this can be revised
 #else
 // coherent memory region (4 MB)
 #define MEM_COHERENT_REGION	((MEM_EXCEPTION_STACK_END + 2*MEGABYTE) & ~(MEGABYTE-1))

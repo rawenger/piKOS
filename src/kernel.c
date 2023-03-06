@@ -18,14 +18,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdint.h>
 
 #include "mmio.h"
 #include "types.h"
+#include "kmalloc.h"
 #include "util/utils.h"
 #include "peripherals/uart0.h"
 #include "peripherals/mini_uart.h"
+#include "util/memorymap.h"
 
 static void irq_init()
 {
@@ -41,6 +42,15 @@ static void irq_init()
 	enable_irq();
 }
 
+/* Initialize libraries, software layer stuff. Don't put driver code in here! */
+// TODO: rename this LOL
+static void init_stuff(void)
+{
+	init_kmalloc();
+}
+
+extern void test_kmalloc(void);
+
 _Noreturn void kernel_main(void)
 {
 	delay(1000);
@@ -49,9 +59,7 @@ _Noreturn void kernel_main(void)
 	muart_init(); // miniUART
 	muart_send_str("miniUART initialized\r\n");
 #endif
-
 	uart0_init();
-
 	irq_init();
 
 	uint64_t el;
@@ -62,12 +70,12 @@ _Noreturn void kernel_main(void)
 	muart_send('0' + el);
 	muart_send_str("\r\n");
 
-	char c;
-	muart_send_str("here\r\n");
-	//asm volatile ("\nsvc #0\t");
+	init_stuff();
+
+	test_kmalloc();
+
 	while (1) {
-//		c = uart0_recv();
-//		uart0_send(c);
+
 	}
 }
 
