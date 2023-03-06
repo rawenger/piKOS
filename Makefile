@@ -112,8 +112,6 @@ $(KERNEL).img: $(SRC_DIR)/linker.ld $(OBJ_FILES)
 	@echo "  COPY  $(KERNEL).img"
 	@$(OBJCOPY) $(BUILD_DIR)/$(KERNEL).elf -O binary $(KERNEL).img
 
-# TODO: why does this only worked if launched via CLion "Embedded GDB Server" launch
-#  configuration (with the EXACT same arguments), but not when done directly via CLI?
 qemu: $(KERNEL).img
 	qemu-system-aarch64 -serial stdio $(QEMU_FLAGS) -kernel $<
 
