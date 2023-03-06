@@ -51,6 +51,6 @@ extern void register_isr(IntType which, int_handler_t handler);
 _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *context);
 /* Actual handler called by the stub in the hardware vector table */
 void irq_handler(void);
-#endif
+#endif // #ifndef __ASSEMBLER__
 
 
