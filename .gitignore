@@ -2,3 +2,4 @@
 arm-gnu-toolchain*
 build
 kernel*.img
+.swp
