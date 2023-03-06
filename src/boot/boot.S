@@ -23,11 +23,6 @@
 
 #include "util/memorymap.h"
 
-//#define MULTICORE
-#ifdef MULTICORE
-#include "smp.h"
-#endif
-
 	.macro armv8_switch_to_el1_m, xreg1, xreg2
 
 	/* Initialize Generic Timers */
