@@ -37,18 +37,37 @@
 
         /* If from_kern is 1 then we are being entered
          * from the kernel and need to save sp, rather
-         * than sp_el0
+         * than sp_el0.
+         *
+         * We set up the stack to look like this:
+         *
+         * +------------+
+         * |    x0      | <-- 0x7CF0 (-784)
+         * |  (sp_el0)  | ** Blank unless being called from EL0 (i.e: from_kern = 0)
+         *      ...
+         * |    x27     | <-- 0x7DD0 (-560)
+         * |    x28     |
+         * |    q0      | <-- 0x7DE0 (-544)
+         *      ...
+         * |    q30     |
+         * |    q31     |
+         * |  elr_el1   | <-- 0x7FE0 (-32)
+         * |  spsr_el1  |
+         * |    x29     | <-- 0x7FF0 (-16)
+         * |    x30     |
+         * +------------+ <-- 0x8000 (W.L.O.G.)
          */
         .macro save_state from_kern
         stp     x29, x30, [sp, #-16]!
-        mrs     x29, elr_el1 // save exception return address
         mrs     x30, spsr_el1 // save calling stack
+        mrs     x29, elr_el1 // save exception return address
         stp     x29, x30, [sp, #-16]!
 
-        /* save off all our GP and FP registers */
-        // FP's first because 16-byte alignment
-        // makes it easier to align the odd number of
-        // GP regs at the top of the stack
+        /* Save off all our GP and VFP registers */
+        /* VFP's first because machine-mandated 16-byte alignment
+         * makes it easier to align the odd number of GP regs
+         * at the top of the stack.
+         */
         stp     q30, q31, [sp, #-32]!
         stp     q28, q29, [sp, #-32]!
         stp     q26, q27, [sp, #-32]!
@@ -80,10 +99,11 @@
         stp     x5, x6, [sp, #-16]!
         stp     x3, x4, [sp, #-16]!
         stp     x1, x2, [sp, #-16]!
-        str     x0, [sp, #-16]!
 
         .if \from_kern == 0
-        mrs     x0, sp_el0
+        mrs     x1, sp_el0
+        stp     x0, x1, [sp, #-16]!
+        .else
         str     x0, [sp, #-16]!
         .endif
         .endm
@@ -91,12 +111,13 @@
         /* restore register state after handling IRQ/Exception */
         .macro restore_state to_kern
         .if \to_kern == 0
+        ldp     x0, x1, [sp], #16
+        msr     sp_el0, x1
+        .else
         ldr     x0, [sp], #16
-        msr     sp_el0, x0
         .endif
 
         /* restore GP regs (except x29 & x30) first since we saved them second */
-        ldr     x0, [sp], #16
         ldp     x1, x2, [sp], #16
         ldp     x3, x4, [sp], #16
         ldp     x5, x6, [sp], #16
@@ -112,7 +133,7 @@
         ldp     x25, x26, [sp], #16
         ldp     x27, x28, [sp], #16
 
-        /* FP regs */
+        /* VFP regs */
         ldp     q0, q1, [sp], #32
         ldp     q2, q3, [sp], #32
         ldp     q4, q5, [sp], #32
@@ -188,14 +209,23 @@ SyscallStub: /// TODO
 
 
 /* Unallowed exceptions */
+        .globl SyncStub
 SyncStub:
         invalid_exception E_SYNC
+
+        .globl ErrorStub
 ErrorStub: // TODO this will eventually need to be implemented to handle e.g. page faults
         invalid_exception E_ERROR
+
+        .globl FIQStub
 FIQStub:
         invalid_exception E_FIQ
+
+        .globl AARCH32
 AARCH32:
         invalid_exception E_32BIT
+
+        .globl BadIRQStub
 BadIRQStub:
         invalid_exception E_BADIRQ
 

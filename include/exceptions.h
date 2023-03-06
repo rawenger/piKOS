@@ -21,11 +21,36 @@ struct ExceptionContext {
 	void *spsr_el1;
 	void *esr_el1;
 };
-#else
+
+#else // #ifdef DEBUG
 struct ExceptionContext {};
-#endif
+#endif // #ifdef DEBUG
+
+// for KOS programmer-implemented ISR's
+typedef void (*int_handler_t) (void);
+typedef enum {
+	TimerInt, DiskInt, ConsoleWriteInt, ConsoleReadInt,
+	NetworkSendInt, NetworkRecvInt
+} IntType;
+#define KOS_IRQ_NUM             6 /* number of enum entries above */
+
+/* Invokes the handler registered by KOS for the given interrupt type.
+ * If no handler is registered, does nothing
+ */
+void call_KOS_handler(IntType which);
+
+/* This is a replacement for the interruptHandler() routine from KOS`exception.c,
+ * since it just doesn't make sense to determine the IRQ type in our actual handler,
+ * only to convert it to an enum value and to pass back into another function which
+ * must again determine the type. Instead, we just have KOS set up a jump table for these
+ * different types, which also allows us to do some special intermediate handling on UART
+ * interrupts in order to prevent (or at least reduce) dropped data.
+ */
+extern void register_isr(IntType which, int_handler_t handler);
 
 _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *context);
+/* Actual handler called by the stub in the hardware vector table */
+void irq_handler(void);
 #endif
 
 

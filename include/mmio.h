@@ -106,6 +106,17 @@
 #define UART0_RIS       (UART0_BASE + 0x3C)     // Raw Interrupt Status Register
 
 #define UART0_MIS       (UART0_BASE + 0x40)     // Masked Interrupt Status Register
+#define MIS_OEMIS       (1 << 10)
+#define MIS_BEMIS       (1 << 9)
+#define MIS_PEMIS       (1 << 8)
+#define MIS_FEMIS       (1 << 7)
+#define MIS_RTMIS       (1 << 6)
+#define MIS_TXMIS       (1 << 5)
+#define MIS_RXMIS       (1 << 4)
+#define MIS_DSRMMIS     (1 << 3)
+#define MIS_DCDMMIS     (1 << 2)
+#define MIS_CTSMMIS     (1 << 1)
+#define MIS_RIMMIS      (1 << 0)
 
 #define UART0_ICR       (UART0_BASE + 0x44)     // Interrupt Clear Register
 #define ICR_MASK        (0x7FF)
@@ -159,6 +170,7 @@
 
 
 #include "peripherals/bcm2835.h"
+#include "peripherals/bcm2836.h"
 #include "peripherals/bcm2835int.h"
 #if (RASPPI == 4)
 #include "peripherals/bcm2711.h"

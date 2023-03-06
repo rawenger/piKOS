@@ -1,6 +1,8 @@
 #include "mmio.h"
 #include "util/utils.h"
 #include "peripherals/uart0.h"
+#include "peripherals/mini_uart.h"
+#include "exceptions.h"
 
 #define UART0_CLOCK	        (48000000UL)
 
@@ -33,37 +35,40 @@ void uart0_init()
 
 	// enable hardware flow control
 	mmio_write32(UART0_CR, CR_CTSEN_MASK | CR_RTSEN_MASK);
-	// enable DMA for Tx and Rx
-	// We will eventually use this to mimic the behavior of KOS's ConsoleRead/ConsoleWrite
-	// functions, which perform non-blocking I/O to the kernel's console device
-	mmio_write32(UART0_DMACR, DMACR_RXDMAE | DMACR_TXDMAE);
 
-	// enable Tx and Rx interrupts
-	mmio_write32(UART0_IMSC, IMSC_TXIM | IMSC_RXIM);
+	// enable Tx & Rx interrupts
+	mmio_write32(UART0_IMSC, IMSC_RXIM | IMSC_TXIM);
+	// set Rx & Tx FIFO interrupt trigger levels to 1/8 full
+	mmio_write32(UART0_IFLS, (IFLS_IFSEL_1_8 << IFLS_RXIFSEL_SHIFT) | (IFLS_IFSEL_1_8 << IFLS_TXIFSEL_SHIFT));
 
 	// enable tx,rx
 	mmio_write32(UART0_CR, CR_UART_EN_MASK | CR_TXE_MASK | CR_RXE_MASK);
 }
 
-void uart0_send(char c)
+/* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
+static char console_read_char;
+
+void uart0_irq_handler(void)
 {
-	while (mmio_read32(UART0_FR) & FR_TXFF_MASK)
-		;
+	uint32_t int_type = mmio_read32(UART0_MIS);
+	mmio_write32(UART0_ICR, int_type);
 
-	mmio_write32(UART0_DR, c);
-}
+	if (int_type & MIS_RXMIS) {
+		console_read_char = mmio_read32(UART0_DR);
+#ifdef DEBUG
+		muart_send_str("Received character: '");
+		muart_send(console_read_char);
+		muart_send_str("'\r\n");
+#endif
+		call_KOS_handler(ConsoleReadInt);
+	}
+	if (int_type & MIS_TXMIS) {
+		/* console_write() is what actually accesses the DR here */
+		call_KOS_handler(ConsoleWriteInt);
+	}
 
-
-char uart0_recv()
-{
-	while (mmio_read32(UART0_FR) & FR_RXFE_MASK)
-		;
-
-	return mmio_read32(UART0_DR) & 0xFF;
-}
-
-void uart0_send_str(const char *str)
-{
-	while (*str)
-		uart0_send(*str++);
+#ifdef DEBUG
+	if (int_type & ~(MIS_TXMIS | MIS_RXMIS))
+	muart_send_str("other interrupt occurred in uart0\r\n");
+#endif
 }

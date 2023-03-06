@@ -25,7 +25,7 @@
 #pragma once
 
 #if RASPPI >= 4
-	#include <circle/bcm2711int.h>
+	#include "peripherals/bcm2711int.h"
 #else
 
 // IRQs
