@@ -95,14 +95,17 @@ _start: // Entered from armstub8 while in EL2 after boot
 
 EL1setup:
         /* Zero out the .bss segment */
-	adr	x0, bss_begin
-	adr	x1, bss_end
-	sub	x1, x1, x0
-	bl 	memzero
+	adrp	x0, bss_begin
+        add     x0, x0, :lo12:bss_begin
+	mov     x1, xzr
+	adrp	x2, bss_end
+	add     x2, x2, :lo12:bss_end
+	sub	x2, x2, x0
+	bl 	__memset_aarch64
 
         /* set up core 0 main kernel stack */
         ldr     x0, =MEM_KERNEL_STACK
-        mov      sp, x0
+        mov     sp, x0
 
         /* set up EL1 exception vectors */
         ldr     x0, =VectorTable
@@ -115,6 +118,5 @@ EL1setup:
 #ifdef MULTICORE
 	.globl	_start_secondary
 _start_secondary: // entered by non-primary cores in EL2 after boot
-        // TODO
         b _start_secondary
 #endif

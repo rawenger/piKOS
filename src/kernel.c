@@ -27,39 +27,48 @@
 #include "peripherals/uart0.h"
 #include "peripherals/mini_uart.h"
 
-volatile int busy;
-
-static void enable_irq_controller()
+static void irq_init()
 {
+	mmio_write32(ARM_IC_FIQ_CONTROL, 0); // completely disable FIQ's -- Linux does not use them so neither will we
+	mmio_write32(ARM_IC_DISABLE_IRQS_1, -1);
+	mmio_write32(ARM_IC_DISABLE_IRQS_2, -1);
+	mmio_write32(ARM_IC_DISABLE_BASIC_IRQS, -1);
+	mmio_write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
+
 //	mmio_write32(ARM_IC_ENABLE_IRQS_1, ARM_IRQ_TIMER1);
 	mmio_write32(ARM_IC_ENABLE_IRQS_2, ARM_IRQ_UART);
+
+	enable_irq();
 }
 
 _Noreturn void kernel_main(void)
 {
-        busy = 0;
-	uart0_init();
-	enable_irq_controller();
-	enable_irq();
+	delay(1000);
 
 #ifdef DEBUG
 	muart_init(); // miniUART
+	muart_send_str("miniUART initialized\r\n");
 #endif
 
-	uart0_send_str("Hello, world!\r\n");
+	uart0_init();
+
+	irq_init();
 
 	uint64_t el;
 	asm volatile ("\tmrs %0, CurrentEL\n"
 		      "\tlsr %0, %0, #2\n"
 		      : "=r" (el));
-	uart0_send_str("Running in EL ");
-	uart0_send('0' + el);
-	uart0_send_str("\r\n");
+	muart_send_str("Running in EL ");
+	muart_send('0' + el);
+	muart_send_str("\r\n");
 
 	char c;
+	muart_send_str("here\r\n");
+	//asm volatile ("\nsvc #0\t");
 	while (1) {
-		c = uart0_recv();
-		uart0_send(c);
+//		c = uart0_recv();
+//		uart0_send(c);
 	}
 }
+
 
