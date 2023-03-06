@@ -18,7 +18,6 @@ SECTIONS
         *(.data*)
     }
 
-    . = ALIGN(0x8);
     .bss : {
         bss_begin = .;
 
