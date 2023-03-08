@@ -47,19 +47,22 @@ void uart0_init()
 
 /* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
 static char console_read_char;
+static char console_buf[16];
+static size_t console_buf_idx = 0;
 
+__attribute__((optimize(3)))
 void uart0_irq_handler(void)
 {
 	uint32_t int_type = mmio_read32(UART0_MIS);
 	mmio_write32(UART0_ICR, int_type);
 
 	if (int_type & MIS_RXMIS) {
-		console_read_char = mmio_read32(UART0_DR);
-#ifdef DEBUG
-		muart_send_str("Received character: '");
-		muart_send(console_read_char);
-		muart_send_str("'\r\n");
-#endif
+//		console_read_char = mmio_read32(UART0_DR);
+		console_buf[console_buf_idx++] = mmio_read32(UART0_DR);
+		console_buf_idx &= 0xF;
+//#ifdef DEBUG
+//		printk("Received character: '%c'\r\n", console_read_char);
+//#endif
 		call_KOS_handler(ConsoleReadInt);
 	}
 	if (int_type & MIS_TXMIS) {
@@ -69,6 +72,12 @@ void uart0_irq_handler(void)
 
 #ifdef DEBUG
 	if (int_type & ~(MIS_TXMIS | MIS_RXMIS))
-	muart_send_str("other interrupt occurred in uart0\r\n");
+	printk("other interrupt occurred in uart0\r\n");
 #endif
+}
+
+void dump_console_buf(void)
+{
+	console_buf[15] = '\0';
+	printk("console_buf: %s\r\n", console_buf);
 }

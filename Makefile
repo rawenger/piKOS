@@ -1,6 +1,7 @@
 RASPPI ?= 3
 AARCH = 64 # for now, 32-bit is unsupported
 DEBUG ?= 1 # set to 1 to enable debug info & define DEBUG macro
+OPTIMIZE_LEVEL ?= 3 # argument to the compiler's '-O' flag. Only applies to non-debug builds
 
 ifeq ($(strip $(RASPPI)), 3)
 	TARGET_CPU  = cortex-a53
@@ -58,7 +59,7 @@ CFLAGS  += $(addprefix -I, $(C_INCLUDES))
 ASFLAGS += $(addprefix -I, $(AS_INCLUDES))
 
 ifneq ($(strip $(DEBUG)), 1)
-	CFLAGS 		+= -O2
+	CFLAGS 		+= -O$(strip $(OPTIMIZE_LEVEL))
 else
 	CFLAGS		+= -g -Og -DDEBUG
 	ASFLAGS		+= -g -DDEBUG
@@ -67,8 +68,8 @@ else
 endif
 
 
-BUILD_DIR = build
 SRC_DIR   = src
+BUILD_DIR = build
 
 TARGET = $(KERNEL).img
 
@@ -87,7 +88,7 @@ OBJ_FILES += $(ASM_FILES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%_S.o)
 
 all: $(TARGET)
 
-DEP_FILES = $(OBJ_FILES:%.o=%.d)
+DEP_FILES = $(OBJ_FILES:$%.o=%.d)
 -include $(DEP_FILES)
 
 
@@ -106,11 +107,13 @@ $(BUILD_DIR)/%_S.o: $(SRC_DIR)/%.S
 	@echo "  AS    $<"
 	@$(CC) $(ASFLAGS) -MMD -c $< -o $@
 
-$(KERNEL).img: $(SRC_DIR)/linker.ld $(OBJ_FILES)
+$(BUILD_DIR)/$(KERNEL).elf: $(SRC_DIR)/linker.ld $(OBJ_FILES)
 	@echo "  LD    $(KERNEL).elf"
-	@$(LD) $(LDFLAGS) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/$(KERNEL).elf  $(OBJ_FILES)
+	@$(LD) $(LDFLAGS) -T $(SRC_DIR)/linker.ld -o $@  $(OBJ_FILES)
+
+$(KERNEL).img: $(BUILD_DIR)/$(KERNEL).elf
 	@echo "  COPY  $(KERNEL).img"
-	@$(OBJCOPY) $(BUILD_DIR)/$(KERNEL).elf -O binary $(KERNEL).img
+	@$(OBJCOPY) $< -O binary $(KERNEL).img
 
 qemu: $(KERNEL).img
 	qemu-system-aarch64 -serial stdio $(QEMU_FLAGS) -kernel $<

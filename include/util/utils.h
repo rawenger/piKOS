@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "printk.h"
 
 #define BIT(bit)			(1 << (bit))
 

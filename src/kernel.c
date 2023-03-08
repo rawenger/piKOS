@@ -19,6 +19,7 @@
  */
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "mmio.h"
 #include "types.h"
@@ -49,8 +50,9 @@ static void init_stuff(void)
 	init_kmalloc();
 }
 
-extern void test_kmalloc(void);
 
+extern void dump_console_buf(void);
+extern size_t irq_count;
 _Noreturn void kernel_main(void)
 {
 	delay(1000);
@@ -66,13 +68,14 @@ _Noreturn void kernel_main(void)
 	asm volatile ("\tmrs %0, CurrentEL\n"
 		      "\tlsr %0, %0, #2\n"
 		      : "=r" (el));
-	muart_send_str("Running in EL ");
-	muart_send('0' + el);
-	muart_send_str("\r\n");
+	assert(el > 0);
+	printk("Running in EL %lu\r\n", el);
 
 	init_stuff();
 
-	test_kmalloc();
+	delay(1000000000); // wait for console_buf to fill
+//	dump_console_buf();
+	printk("Received %lu IRQ's\r\n", irq_count);
 
 	while (1) {
 

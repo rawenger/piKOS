@@ -5,6 +5,7 @@
 #include "exceptions.h"
 #include "peripherals/mini_uart.h"
 #include "mmio.h"
+#include "printk.h"
 
 extern void uart0_irq_handler(void);
 
@@ -38,7 +39,7 @@ _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *contex
 			muart_send_str("E_TODO\r\n");
 			break;
 		default:
-			muart_send_str("Unkown\r\n");
+			muart_send_str("Unknown\r\n");
 	}
 #endif
 	// TRAP here to read out members of `context` because
@@ -47,11 +48,12 @@ _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *contex
 		;
 }
 
+size_t irq_count = 0;
+
+__attribute__((optimize(3)))
 void irq_handler(void)
 {
-#ifdef DEBUG
-	muart_send_str("inside irq_handler()\r\n");
-#endif
+	++irq_count;
 	/* We have 3 registers for the pending IRQ's, but for our purposes
 	 * the only IRQ's we *should* be dealing with are timer interrupts
 	 * and console read/write interrupts (a.k.a. UART0 interrupts).
@@ -82,13 +84,7 @@ void irq_handler(void)
 		mmio_write32(ARM_IC_IRQ_PENDING_2, 0);
 		mmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);
 #ifdef DEBUG
-		/* TODO: make a printk or something */
-		/*            0123456789 123456789 123456789 */
-		char msg[] = "IRQ #$$ asserted on line $\r\n";
-		msg[5] = '0' + (irq_n / 10);
-		msg[6] = '0' + (irq_n % 10);
-		msg[25] = '1' + reg;
-		muart_send_str(msg);
+		printk("IRQ #%d asserted on line %d\r\n", irq_n, reg);
 #endif
 
 	}

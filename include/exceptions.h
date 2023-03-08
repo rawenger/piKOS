@@ -11,6 +11,12 @@
 #define E_BADIRQ        4
 #define E_TODO          5
 
+/* Disable saving of the floating point/SIMD registers on exception entry
+ * if we are coming from the kernel, since the kernel does not use these.
+ * Set to 1 to enable saving them.
+ */
+#define SAVE_VFP_REGS_FROM_EL1  0
+
 #ifndef __ASSEMBLER__
 #ifdef DEBUG
 struct ExceptionContext {
