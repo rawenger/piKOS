@@ -47,8 +47,6 @@ void uart0_init()
 
 /* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
 static char console_read_char;
-static char console_buf[16];
-static size_t console_buf_idx = 0;
 
 __attribute__((optimize(3)))
 void uart0_irq_handler(void)
@@ -57,9 +55,7 @@ void uart0_irq_handler(void)
 	mmio_write32(UART0_ICR, int_type);
 
 	if (int_type & MIS_RXMIS) {
-//		console_read_char = mmio_read32(UART0_DR);
-		console_buf[console_buf_idx++] = mmio_read32(UART0_DR);
-		console_buf_idx &= 0xF;
+		console_read_char = mmio_read32(UART0_DR);
 //#ifdef DEBUG
 //		printk("Received character: '%c'\r\n", console_read_char);
 //#endif

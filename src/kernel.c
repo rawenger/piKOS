@@ -51,8 +51,6 @@ static void init_stuff(void)
 }
 
 
-extern void dump_console_buf(void);
-extern size_t irq_count;
 _Noreturn void kernel_main(void)
 {
 	delay(1000);
@@ -72,10 +70,6 @@ _Noreturn void kernel_main(void)
 	printk("Running in EL %lu\r\n", el);
 
 	init_stuff();
-
-	delay(1000000000); // wait for console_buf to fill
-//	dump_console_buf();
-	printk("Received %lu IRQ's\r\n", irq_count);
 
 	while (1) {
 

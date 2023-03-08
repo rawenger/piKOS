@@ -48,12 +48,9 @@ _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *contex
 		;
 }
 
-size_t irq_count = 0;
-
 __attribute__((optimize(3)))
 void irq_handler(void)
 {
-	++irq_count;
 	/* We have 3 registers for the pending IRQ's, but for our purposes
 	 * the only IRQ's we *should* be dealing with are timer interrupts
 	 * and console read/write interrupts (a.k.a. UART0 interrupts).
