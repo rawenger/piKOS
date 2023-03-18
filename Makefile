@@ -47,7 +47,7 @@ OBJCOPY=$(PREFIX)objcopy
 C_INCLUDES  = include # quote to distinguish from builtin make directive
 AS_INCLUDES = include
 
-CFLAGS  += -Wall -std=gnu17
+CFLAGS  += -Wall -std=gnu2x # constexpr FINALLY!
 CFLAGS  += -nostdlib -nostartfiles -ffreestanding
 CFLAGS	+= -mcpu=$(TARGET_CPU)
 CFLAGS  += -DRASPPI=$(RASPPI) -DAARCH=$(AARCH)
