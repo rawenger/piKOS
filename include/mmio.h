@@ -5,14 +5,19 @@
 
 #pragma once
 #include "types.h"
+#include "util/memorymap.h"
 
 #if (RASPPI == 4)
-#define MMIO_BASE       (0xFE000000)
-#define SYSTEM_CLOCK_FREQ	500000000UL
+#define MMIO_BASE               (0xFE000000UL)
+#define SYSTEM_CLOCK_FREQ	(500000000UL)
 #elif (RASPPI == 3)
-#define MMIO_BASE       (0x3F000000)
-#define SYSTEM_CLOCK_FREQ	250000000UL
+#define MMIO_BASE               (0x3F000000UL)
+#define SYSTEM_CLOCK_FREQ	(250000000UL)
 #endif
+/* Offset applied by vmmio_read/write before accessing peripherals; drivers work with physical addresses.
+ * Currently, we map all the MMIO to the top 1GiB of our level 0 PTE 256TiB address space.
+ */
+#define MMIO_VM_OFFSET          (KERN_VM_BASE | (511UL << 30))
 
 // The offsets for each register.
 #define GPIO_BASE       (MMIO_BASE + 0x200000)
@@ -177,12 +182,12 @@
 #include "peripherals/bcm2711int.h"
 #endif
 
-static inline void mmio_write32(uintptr_t reg, uint32_t data)
+static inline void vmmio_write32(uintptr_t reg, uint32_t data)
 {
-        *(volatile uint32_t *) reg = data;
+	*(volatile uint32_t *) (MMIO_VM_OFFSET | reg) = data;
 }
 
-static inline uint32_t mmio_read32(uintptr_t reg)
+static inline uint32_t vmmio_read32(uintptr_t reg)
 {
-	return *(volatile uint32_t *) reg;
+	return *(volatile uint32_t *) (MMIO_VM_OFFSET | reg);
 }

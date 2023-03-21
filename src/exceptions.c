@@ -18,7 +18,7 @@ void call_KOS_handler(IntType which)
 }
 
 __attribute__((optimize(0))) // prevent compiler optimizing out `context` parameter
-_Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *context)
+_Noreturn void InvalidExceptionHandler(int type, int currentEL, struct ExceptionContext *context)
 {
 #ifdef DEBUG
 	muart_send_str("Invalid exception: ");
@@ -57,9 +57,9 @@ void irq_handler(void)
 	 * Just to be safe, let's still just check everything
 	 */
 	uint32_t pending[3] = {
-		mmio_read32(ARM_IC_IRQ_PENDING_1),
-		mmio_read32(ARM_IC_IRQ_PENDING_2),
-		mmio_read32(ARM_IC_IRQ_BASIC_PENDING) & 0xFF,
+		vmmio_read32(ARM_IC_IRQ_PENDING_1),
+		vmmio_read32(ARM_IC_IRQ_PENDING_2),
+		vmmio_read32(ARM_IC_IRQ_BASIC_PENDING) & 0xFF,
 	};
 
 	for (unsigned reg = 0; reg < 3; reg++) {
@@ -77,9 +77,9 @@ void irq_handler(void)
 			uart0_irq_handler();
 			return;
 		}
-		mmio_write32(ARM_IC_IRQ_PENDING_1, 0);
-		mmio_write32(ARM_IC_IRQ_PENDING_2, 0);
-		mmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);
+		vmmio_write32(ARM_IC_IRQ_PENDING_1, 0);
+		vmmio_write32(ARM_IC_IRQ_PENDING_2, 0);
+		vmmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);
 #ifdef DEBUG
 		printk("IRQ #%d asserted on line %d\r\n", irq_n, reg);
 #endif

@@ -2,10 +2,13 @@
  *
  * Copyright (C) 2023 Ryan Wenger
  *
- * This file contains sligthly modified code from U-Boot:
+ * This file contains sligthly modified code from U-Boot
  *  armv8_switch_to_el1_m macro
  *  defined in arch/arm/include/asm/macro.h
  *  Copyright (C) 2009 Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+ * (In particular, we configure and enable the MMU for stage 1 EL1&0 translation
+ *  while still in EL2, thus leaving us with no need to have any kind of "bootstrap"/
+ *  trampoline for enabling address translation from within EL1 itself.)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +26,7 @@
 
 #include "util/memorymap.h"
 
-	.macro armv8_switch_to_el1_m, xreg1, xreg2
+	.macro armv8_switch_to_el1_m, xreg1, xreg2, return_symbol
 
 	/* Initialize Generic Timers */
 	mrs	\xreg1, cnthctl_el2
@@ -59,54 +62,62 @@
 	movk	\xreg1, #0x30d0, lsl #16
 	msr	sctlr_el1, \xreg1
 
+	/* configure page table and turn on MMU */
+	bl      EL2_MMU_bootstrap
+
 	/* Return to the EL1_SP1 mode from EL2 */
 	mov	\xreg1, #0x3c4
 	msr	spsr_el2, \xreg1	/* EL1_SP0 | D | A | I | F */
-	adr	\xreg1, 1f
+	//adr	\xreg1, 1f
+	ldr     \xreg1, =\return_symbol
 	msr	elr_el2, \xreg1
 	eret
-1:
 
 	.endm
 
 
-.section ".init"
+.section .text.boot
 
         .globl _start
-_start: // Entered from armstub8 while in EL2 after boot
-	mrs     x0, CurrentEL // make sure we aren't already in EL1
-	cmp     x0, #4  // EL stored in bits[3:2]
-	beq     EL1setup
+_start: /* Entered from armstub8 while in EL2 after boot */
+	mrs     x0, CurrentEL /* If we're in EL1, something's wrong */
+	cmp     x0, #4  // value stored in bits[3:2]
+	beq     _start
 
-        /* Set up EL2 exception stack */
-        ldr     x0, =MEM_EXCEPTION_STACK
+        /* Set up EL1 exception stack */
+        ldr     x0, =EXCEPTION_STACK_BASE_VM
         msr     sp_el1, x0
 
-        /* Set up exception vector table */
-        ldr     x0, =VectorTable
-        msr     vbar_el2, x0
-
-        armv8_switch_to_el1_m x0, x1
-
-EL1setup:
-        /* Zero out the .bss segment */
-	adrp	x0, bss_begin
-        add     x0, x0, :lo12:bss_begin
-	mov     x1, xzr
-	adrp	x2, bss_end
-	add     x2, x2, :lo12:bss_end
-	sub	x2, x2, x0
-	bl 	memset
-
-        /* set up core 0 main kernel stack */
-        ldr     x0, =MEM_KERNEL_STACK
+        /* Set up core 0 EL2 stack, just with physical memory (needed for the MMU initialization) */
+        ldr     x0, =KERN_STACK_BASE_PHYS
         mov     sp, x0
 
+        /* Set up EL2 exception vector table */
+        // TODO: current code in VectorTable assumes we have MMU turned on (and is linked at a virtual address anyway)
+        //ldr     x0, =VectorTable
+        //msr     vbar_el2, x0
+
+        armv8_switch_to_el1_m x0, x1, EL1_entry
+
+        .section .text
+EL1_entry:
         /* set up EL1 exception vectors */
         ldr     x0, =VectorTable
         msr     vbar_el1, x0
 
-	bl	kernel_main
+        /* set up core 0 main kernel stack */
+        ldr     x0, =KERN_STACK_BASE_VM
+        mov     sp, x0
+
+        /* Zero out the .bss segment */
+	ldr     x0, =bss_begin
+	mov     x1, xzr
+        ldr     x2, =bss_end
+	sub	x2, x2, x0
+	bl 	memset
+
+	/* enter the Kernel Proper! */
+        b       kernel_main
 
 	// don't wake up other cores, KOS is NOT that advanced LOL
 

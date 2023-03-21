@@ -9,7 +9,8 @@
 
 void delay (unsigned long);
 
-extern void memset(void *dest, int val, size_t nbytes)
+extern void
+memset(void *dest, int val, size_t nbytes)
 	__attribute__((nonnull (1)));
 
 extern void memcpy(void *restrict dest, const void *restrict src, size_t nbytes)

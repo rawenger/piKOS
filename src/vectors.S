@@ -10,6 +10,8 @@
         .endm
 
         .macro invalid_exception eType
+        mrs     x6, CurrentEL // grab this first for Reasons
+        lsr     x6, x6, #2
 #ifdef DEBUG
         /* Save some important debug info to pass into
          * our exception handler.
@@ -22,14 +24,15 @@
         mrs     x3, sp_el0
         mov     x4, lr // (ra)
         mov     x5, sp // (including the stack itself)
-        stp     x4, x5, [sp, #-16]!
-        stp     x2, x3, [sp, #-16]!
-        stp     x0, x1, [sp, #-16]!
-        mov     x1, sp
+        stp     x1, x0, [sp, #-16]!
+        stp     x3, x2, [sp, #-16]!
+        stp     x5, x4, [sp, #-16]!
+        mov     x2, sp
 #else
-        mov     x1, xzr
+        mov     x2, xzr
 #endif
-        /* call InvalidExceptionHandler */
+        /* call _Noreturn void InvalidExceptionHandler(int type, int currentEL, struct ExceptionContext *context) */
+        mov     w1, w6
         mov     w0, \eType
         b       InvalidExceptionHandler
 

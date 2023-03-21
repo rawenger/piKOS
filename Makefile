@@ -53,7 +53,7 @@ CFLAGS	+= -mcpu=$(TARGET_CPU)
 CFLAGS  += -DRASPPI=$(RASPPI) -DAARCH=$(AARCH)
 ASFLAGS += # add more here when necessary
 
-LDFLAGS += --section-start=.init=$(INITADDR)
+#LDFLAGS += --section-start=.text.boot=$(INITADDR)
 
 CFLAGS  += $(addprefix -I, $(C_INCLUDES))
 ASFLAGS += $(addprefix -I, $(AS_INCLUDES))
