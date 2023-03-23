@@ -7,10 +7,6 @@
  * https://armv8-ref.codingbelief.com/en/chapter_d4/d43_2_armv8_translation_table_level_3_descriptor_formats.html
  */
 
-/* At 4K granule size, each level 2 descriptor can handle mappings for 1GB of phys memory
- * In order to support Pi 4B's max of 8GB memory, we use lvl 1 descriptor for our base
- */
-
 #pragma once
 #include "util/memorymap.h"
 
