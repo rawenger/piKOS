@@ -1,29 +1,32 @@
-//
-// bcm2711.h
-//
-// Circle - A C++ bare metal environment for Raspberry Pi
-// Copyright (C) 2014-2020  R. Stange <rsta2@o2online.de>
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-#ifndef _circle_bcm2711_h
-#define _circle_bcm2711_h
+/*
+ * bcm2711.h
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * Many of the definitions in this file come from Circle
+ *      file: include/circle/bcm2711.h
+ *      Copyright (C) 2014-2020  R. Stange <rsta2@o2online.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
 
 #if RASPPI >= 4
 
-#include <circle/bcm2835.h>
-#include <circle/sysconfig.h>
+#include "peripherals/bcm2835.h"
 
 //
 // External Mass Media Controller 2 (SD Card)
@@ -65,7 +68,5 @@
 	#define ARM_XHCI_BASE	MEM_PCIE_RANGE_START_VIRTUAL
 #endif
 #define ARM_XHCI_END		(ARM_XHCI_BASE + 0x0FFF)
-
-#endif
 
 #endif

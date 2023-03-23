@@ -1,9 +1,21 @@
-//
-// Created by ryan on 3/17/23.
-//
-
-/* map KERNEL_VA -> KERNEL_PA
- * and hihgmem -> MMIOBASE_PA
+/*
+ * vm_kernel.c
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -65,11 +77,9 @@ union armv8mmu_lvl0_desc *kern_pt_base_pm =
  * page table definitions over in armv8mmu.h), so I'm doing this in C rather than assembler
  * for that reason.
  */
-void
-//__attribute__((section (".text.boot") ))
-//__attribute__((optimize ("O0") ))
-EL2_MMU_bootstrap(void)
+void EL2_MMU_bootstrap(void)
 {
+	/* TODO: refactor most of this */
 	// zero the initial ptable area in the kernel image
 	memset(kern_pt_base_pm, 0, KERN_PGDIR_SIZE);
 

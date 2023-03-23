@@ -1,27 +1,43 @@
 /*
- * Created by ryan on 3/17/23.
+ * armv8mmu.h - MMU-related structure definitions for ARMv8-A
  *
- * Reference for field definitions:
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * References for field definitions:
  * https://armv8-ref.codingbelief.com/en/chapter_d4/d43_1_vmsav8-64_translation_table_descriptor_formats.html#
  * and
  * https://armv8-ref.codingbelief.com/en/chapter_d4/d43_2_armv8_translation_table_level_3_descriptor_formats.html
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
 #include "util/memorymap.h"
 
 #define ARMv8MMU_GRANULE_SIZE                   PAGESIZE /* 4K page size */
-#if (ARMv8MMU_GRANULE_SIZE == 0x1000)
+#if (ARMv8MMU_GRANULE_SIZE == (4 * KILOBYTE))
 	#define ARMv8MMU_MAX_LVL0_TABLE_ENTRIES 512
 	#define ARMv8MMU_MAX_LVL1_TABLE_ENTRIES 512
 	#define ARMv8MMU_MAX_LVL2_TABLE_ENTRIES 512
 	#define ARMv8MMU_LVL3_TABLE_ENTRIES     512 /* must have exactly this number */
-#elif (ARMv8MMU_GRANULE_SIZE == 0x4000)
+#elif (ARMv8MMU_GRANULE_SIZE == (16 * KILOBYTE))
 	#define ARMv8MMU_MAX_LVL0_TABLE_ENTIRES 2
 	#define ARMv8MMU_MAX_LVL1_TABLE_ENTIRES 2048
 	#define ARMv8MMU_MAX_LVL2_TABLE_ENTIRES 2048
 	#define ARMv8MMU_LVL3_TABLE_ENTIRES     2048 /* must have exactly this number */
-#elif (ARMv8MMU_GRANULE_SIZE == 0x10000)
+#elif (ARMv8MMU_GRANULE_SIZE == (64 * KILOBYTE))
 /* #define ARMv8MMU_MAX_LVL0_TABLE_ENTRIES */ /* no L0 tables */
 	#define ARMv8MMU_MAX_LVL1_TABLE_ENTRIES 64
 	#define ARMv8MMU_MAX_LVL2_TABLE_ENTRIES 8192

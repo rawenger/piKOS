@@ -1,11 +1,26 @@
-/* memcpy - copy memory area
+/*
+ * memcpy.S - copy memory area
+ *
  * piKOS: a minimal OS for Raspberry Pi 3 & 4
  *
- * Code taken from
+ * Code from
  * https://github.com/ARM-software/optimized-routines/blob/3f91f739a96e726d4a298f9d9ccafe970a557615/string/aarch64/memcpy.S
  *
  * Copyright (c) 2012-2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /* Assumptions:

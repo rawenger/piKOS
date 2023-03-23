@@ -1,27 +1,32 @@
-//
-// bcm2835int.h
-//
-// This file is taken as-is from Circle:
-//
-// The IRQ list is taken from Linux and is:
-//	Copyright (C) 2010 Broadcom
-//	Copyright (C) 2003 ARM Limited
-//	Copyright (C) 2000 Deep Blue Solutions Ltd.
-//	Licensed under GPL2
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+/*
+ * bcm2835int.h
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * Many of the definitions in this file come from Circle
+ *      file: include/circle/bcm2835int.h
+ *      Copyright (C) 2014-2020  R. Stange <rsta2@o2online.de>
+ *
+ * The IRQ list is taken from Linux and is:
+ *	Copyright (C) 2010 Broadcom
+ *	Copyright (C) 2003 ARM Limited
+ *	Copyright (C) 2000 Deep Blue Solutions Ltd.
+ *	Licensed under GPL2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #pragma once
 
 #if RASPPI >= 4

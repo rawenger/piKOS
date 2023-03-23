@@ -1,22 +1,35 @@
-/* kmalloc.c - kernel heap allocator
+/*
+ * kmalloc.c - kernel heap allocator
  *
  * piKOS: a minimal OS for Raspberry Pi 3 & 4
- *     Copyright (C) 2022-2023 Ryan Wenger
+ *     Copyright (C) 2023 Ryan Wenger
  *
  * Code is pretty much verbatim from one of my old undergrad assignments,
  * except for calloc() and realloc(), which were added for piKOS.
+ *   Copyright (c) 2022-2023 Ryan Wenger
  *
- * Created by Ryan Wenger on 9/24/22.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
+#include "assert.h"
 
 #include "kmalloc.h"
 #include "util/memorymap.h"
 #include "util/utils.h"
 
 #define RECORD_SIZE             (sizeof(struct malloc_stc))
-#define MAX_MALLOC_SIZE         MEM_HEAP_MAXSIZE
+#define MAX_MALLOC_SIZE         KERN_HEAP_MAXSIZE
 
 // TODO: (consider) changing this to a singly-linked list.
 //  Also consider removing the `buf` field since we know
@@ -29,7 +42,7 @@ struct malloc_stc {
 } __attribute__((packed));
 
 static struct malloc_stc *FreeList;
-static void *MemBuff = (void *) MEM_HEAP_START;
+static void *MemBuff = (void *) KERN_HEAP_START;
 
 static void insert_in_FreeList(struct malloc_stc *record, struct malloc_stc *next);
 static void remove_from_FreeList(struct malloc_stc *record);

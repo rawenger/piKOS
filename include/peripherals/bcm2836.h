@@ -1,26 +1,27 @@
-//
-// bcm2836.h
-//
-// This list is taken from Linux and is:
-//	Copyright (C) Broadcom
-//	Licensed under GPL2
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+/*
+ * bcm2836.h
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * This list is taken from Linux and is:
+ *	Copyright (C) Broadcom
+ *	Licensed under GPL2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #pragma once
-
-#if RASPPI >= 2
 
 #if RASPPI <= 3
 #define ARM_LOCAL_BASE			0x40000000
@@ -103,4 +104,3 @@
 
 #define ARM_LOCAL_END			(ARM_LOCAL_BASE + 0x3FFFF)
 
-#endif

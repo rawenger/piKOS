@@ -1,7 +1,26 @@
+/*
+ * uart0.c
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mmio.h"
 #include "util/utils.h"
 #include "peripherals/uart0.h"
-#include "peripherals/mini_uart.h"
 #include "exceptions.h"
 
 #define UART0_CLOCK	        (48000000UL)
@@ -48,7 +67,7 @@ void uart0_init()
 /* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
 static char console_read_char;
 
-__attribute__((optimize(3)))
+__attribute__((optimize(2)))
 void uart0_irq_handler(void)
 {
 	uint32_t int_type = vmmio_read32(UART0_MIS);

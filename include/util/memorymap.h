@@ -1,9 +1,21 @@
 /*
- * memorymap.h
+ * memorymap.h - Kernel memory layout
  *
  * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *      Copyright (c) 2023 Ryan Wenger
  *
- * Memory addresses and sizes (for AArch64)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -26,7 +38,8 @@
 
 #define KERNEL_IMG_MAX_SIZE     (2 * MEGABYTE) // can't be larger than MMU level 2 block descriptor
 
-#define PAGE_SIZE		0x1000U	 // 4K pages
+#define PAGE_SHIFT              12      // 4K page size
+#define PAGE_SIZE		(1UL << PAGE_SHIFT)
 #define PAGESIZE                PAGE_SIZE
 #define KERN_PGDIR_SIZE         (5 * PAGESIZE)
 #define KERN_VM_BASE            (0xFFFFUL << 48)
@@ -50,8 +63,8 @@
 #define EXCEPTION_STACK_BASE_VM         (KERN_STACK_BASE_VM - KERN_STACK_SIZE) // bottom/initial sp
 
 // TODO: update these once VM layout finalized
-#define MEM_HEAP_START		(KERN_STACK_BASE_PHYS - STACK_SIZE - KERN_IMG_END_PHYS)
-#define MEM_HEAP_MAXSIZE        (MEM_HEAP_START + 4 * MEGABYTE) // this can be revised
+#define KERN_HEAP_START		(KERN_STACK_BASE_PHYS - STACK_SIZE - KERN_IMG_END_PHYS)
+#define KERN_HEAP_MAXSIZE       (KERN_HEAP_START + 4 * MEGABYTE) // this can be revised
 
 #ifndef __ASSEMBLER__
 

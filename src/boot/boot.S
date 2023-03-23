@@ -1,14 +1,17 @@
-/* boot.S - initial entry point of piKOS
+/*
+ * boot.S - initial entry point of piKOS
  *
- * Copyright (C) 2023 Ryan Wenger
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
  *
  * This file contains sligthly modified code from U-Boot
  *  armv8_switch_to_el1_m macro
  *  defined in arch/arm/include/asm/macro.h
  *  Copyright (C) 2009 Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
- * (In particular, we configure and enable the MMU for stage 1 EL1&0 translation
+ *
+ * (In particular, the modifications configure and enable the MMU for stage 1 EL1&0 translation
  *  while still in EL2, thus leaving us with no need to have any kind of "bootstrap"/
- *  trampoline for enabling address translation from within EL1 itself.)
+ *  identity mapping for enabling address translation from within EL1 itself.)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

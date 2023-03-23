@@ -1,7 +1,25 @@
-/* mini_uart.c - UART1 device driver for debug piKOS line
+/*
+ * mini_uart.c - UART1 device driver for debug piKOS line
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *  Copyright (C) 2023 Ryan Wenger
  *
  * The muart_init function comes pretty much as-is from
  *      https://github.com/AlMazyr/raspberry-pi-os/blob/lesson01/src/lesson01/src/mini_uart.c
+ *      Licensed under MIT
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "util/utils.h"
