@@ -27,7 +27,7 @@ _Noreturn void assertion_failed(const char *expr, const char *file, int line);
 					((void) 0) : \
 					assertion_failed(#expr, __FILE__, __LINE__))
 #else
-#define assert(expr)            (assume(expr))
+#define assert(expr)            assume(expr)
 #endif
 
 #define static_assert(expr)     _Static_assert(expr, #expr)
