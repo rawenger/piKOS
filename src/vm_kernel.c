@@ -101,7 +101,13 @@ EL2_MMU_bootstrap(void)
 	table_idx = ((armv8_vaddr) KERN_VM_BASE).L1;
 	kern_l1[table_idx].table = lvl1_0;
 
-	/* level 1 pagetable #511 (used to map MMIO peripherals) */
+	/* level 1 pagetable #511 (used to map MMIO peripherals)
+	 * Technically this also maps the 1GiB physical memory in which
+	 * the MMIO is contained as well (so all of phys mem on Pi 3B),
+	 * but it's a temporary solution. For testing. And will eventually
+	 * be done away with.
+	 */
+
 	struct armv8mmu_lvl1_block_desc devmem = {
 		.valid = 1, .type = D_Block,
 		.AttrIdx = MMIO_MAIR_IDX,
