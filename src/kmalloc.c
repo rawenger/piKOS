@@ -25,6 +25,7 @@
 #include "assert.h"
 
 #include "kmalloc.h"
+#include "types.h"
 #include "util/memorymap.h"
 #include "util/utils.h"
 
@@ -55,7 +56,7 @@ void init_kmalloc(void)
         FreeList = (struct malloc_stc *) MemBuff;
         FreeList->prev = FreeList->next = NULL;
         FreeList->size = sizeof(MemBuff) - RECORD_SIZE;
-        FreeList->buf = (uint8_t *) (MemBuff + RECORD_SIZE);
+        FreeList->buf = (u8 *) (MemBuff + RECORD_SIZE);
 }
 
 void *kmalloc(size_t size)
@@ -152,7 +153,7 @@ static void *allocate(size_t size, struct malloc_stc *blockptr)
 
         if (size < blockptr->size) { // create a new record in the remaining free space
                 struct malloc_stc *new_block = (struct malloc_stc *) (blockptr->buf + size);
-                new_block->buf = (uint8_t *) (new_block + 1);
+                new_block->buf = (u8 *) (new_block + 1);
                 new_block->size = blockptr->size - size - RECORD_SIZE;
                 blockptr->size = size;
                 insert_in_FreeList(new_block, blockptr->next);

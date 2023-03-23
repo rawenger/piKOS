@@ -197,12 +197,12 @@
 #include "peripherals/bcm2711int.h"
 #endif
 
-static inline void vmmio_write32(uintptr_t reg, uint32_t data)
+static inline void vmmio_write32(uintptr reg, u32 data)
 {
-	*(volatile uint32_t *) (MMIO_VM_OFFSET | reg) = data;
+	*(volatile u32 *) (MMIO_VM_OFFSET | reg) = data;
 }
 
-static inline uint32_t vmmio_read32(uintptr_t reg)
+static inline u32 vmmio_read32(uintptr reg)
 {
-	return *(volatile uint32_t *) (MMIO_VM_OFFSET | reg);
+	return *(volatile u32 *) (MMIO_VM_OFFSET | reg);
 }

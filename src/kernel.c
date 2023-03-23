@@ -64,7 +64,7 @@ _Noreturn void kernel_main(void)
 	uart0_init();
 	irq_init();
 
-	uint64_t el;
+	u64 el;
 	asm volatile ("\tmrs %0, CurrentEL\n"
 		      "\tlsr %0, %0, #2\n"
 		      : "=r" (el));

@@ -32,7 +32,7 @@
 
 void uart0_init()
 {
-	uint32_t mask;
+	u32 mask;
 
 	mask = vmmio_read32(ARM_GPIO_GPFSEL1);
 	mask &= ~(7 << 12); // reset gpio14
@@ -70,7 +70,7 @@ static char console_read_char;
 __attribute__((optimize(2)))
 void uart0_irq_handler(void)
 {
-	uint32_t int_type = vmmio_read32(UART0_MIS);
+	u32 int_type = vmmio_read32(UART0_MIS);
 	vmmio_write32(UART0_ICR, int_type);
 
 	if (int_type & MIS_RXMIS) {

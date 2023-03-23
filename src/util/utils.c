@@ -21,7 +21,7 @@
 #include "util/utils.h"
 
 __attribute__((optimize(0)))
-void delay(uint64_t cycles)
+void delay(u64 cycles)
 {
 	while (cycles--)
 		;

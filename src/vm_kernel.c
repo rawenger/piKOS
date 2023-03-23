@@ -38,25 +38,25 @@ static void map_kernel();
 static void map_mmio();
 
 // helper to convert descriptor pointer to field to put in parent table descriptor
-static inline uint64_t get_next_lvl_bits_tab(void *pDesc)
+static inline u64 get_next_lvl_bits_tab(void *pDesc)
 {
-	uint64_t val = (uint64_t) pDesc;
+	u64 val = (u64) pDesc;
 	/* we use bits 47:12 for a 4K granule size */
-	return ((val & ~(((uint64_t) -1L) << 48)) >> 12);
+	return ((val & ~(((u64) -1L) << 48)) >> 12);
 }
 
-static inline uint64_t get_next_lvl_bits_block2(void *pDesc)
+static inline u64 get_next_lvl_bits_block2(void *pDesc)
 {
-	uint64_t val = (uint64_t) pDesc;
+	u64 val = (u64) pDesc;
 	/* we use bits 47:21 for a 4K granule size */
-	return ((val & ~(((uint64_t) -1L) << 48)) >> 21);
+	return ((val & ~(((u64) -1L) << 48)) >> 21);
 }
 
-static inline uint64_t get_next_lvl_bits_block1(void *pDesc)
+static inline u64 get_next_lvl_bits_block1(void *pDesc)
 {
-	uint64_t val = (uint64_t) pDesc;
+	u64 val = (u64) pDesc;
 	/* we use bits 47:21 for a 4K granule size */
-	return ((val & ~(((uint64_t) -1L) << 48)) >> 30);
+	return ((val & ~(((u64) -1L) << 48)) >> 30);
 }
 
 extern void *pg_root;
@@ -180,7 +180,7 @@ void EL2_MMU_bootstrap(void)
 
 	asm volatile ("msr ttbr1_el1, %0" : : "r" (kern_pt_base_pm));
 
-	uint64_t tcr_el1;
+	u64 tcr_el1;
 	asm volatile ("mrs %0, tcr_el1" : "=r" (tcr_el1));
 	tcr_el1 &= ~(
 		0
@@ -195,7 +195,7 @@ void EL2_MMU_bootstrap(void)
 	asm volatile ("msr tcr_el1, %0" : : "r" (tcr_el1));
 	asm volatile ("isb" : : : "memory");
 
-	uint64_t sctlr_el1;
+	u64 sctlr_el1;
 	asm volatile ("mrs %0, sctlr_el1" : "=r" (sctlr_el1));
 	sctlr_el1 &= ~(( 1<< 19) | (1<<1) | (1<<2) | (1<<12));
 	sctlr_el1 |= 1; // enable MMU

@@ -72,14 +72,14 @@ void irq_handler(void)
 	 * and console read/write interrupts (a.k.a. UART0 interrupts).
 	 * Just to be safe, let's still just check everything
 	 */
-	uint32_t pending[3] = {
+	u32 pending[3] = {
 		vmmio_read32(ARM_IC_IRQ_PENDING_1),
 		vmmio_read32(ARM_IC_IRQ_PENDING_2),
 		vmmio_read32(ARM_IC_IRQ_BASIC_PENDING) & 0xFF,
 	};
 
 	for (unsigned reg = 0; reg < 3; reg++) {
-		uint32_t pend = pending[reg];
+		u32 pend = pending[reg];
 
 		if (!pend)
 			continue;
@@ -88,7 +88,7 @@ void irq_handler(void)
 		 * testing on aarch64 Linux with native GCC shows that it
 		 * returns 32 there, which is what we want here.
 		 */
-		uint32_t irq_n = __builtin_ctz(pend);
+		u32 irq_n = __builtin_ctz(pend);
 		if (reg == 1 && irq_n == __builtin_ctz(ARM_IRQ_UART)) /* UART */ {
 			uart0_irq_handler();
 			return;
