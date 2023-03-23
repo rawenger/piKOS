@@ -1,6 +1,6 @@
 /* mini_uart.c - UART1 device driver for debug piKOS line
  *
- * This driver is taken pretty much as-is from
+ * The muart_init function comes pretty much as-is from
  *      https://github.com/AlMazyr/raspberry-pi-os/blob/lesson01/src/lesson01/src/mini_uart.c
  */
 
@@ -14,26 +14,15 @@
 
 void muart_send(char c)
 {
-	while (1) {
-		if (vmmio_read32(MUART_LSR_REG) & 0x20)
-			break;
-	}
-	vmmio_write32(MUART_IO_REG, c);
-}
+	while (!(vmmio_read32(MUART_LSR_REG) & 0x20)) ;
 
-char muart_recv(void)
-{
-	while (1) {
-		if (vmmio_read32(MUART_LSR_REG) & 0x01)
-			break;
-	}
-	return vmmio_read32(MUART_IO_REG) & 0xFF;
+	vmmio_write32(MUART_IO_REG, c);
 }
 
 void muart_send_str(char* str)
 {
-	for (int i = 0; str[i] != '\0'; i ++)
-		muart_send((char) str[i]);
+	while (*str)
+		muart_send(*str++);
 }
 
 void muart_init(void)
