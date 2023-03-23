@@ -34,9 +34,6 @@
 #define KERNEL_MAIR_IDX         1
 #define MMIO_MAIR_IDX           2
 
-static void map_kernel();
-static void map_mmio();
-
 // helper to convert descriptor pointer to field to put in parent table descriptor
 static inline u64 get_next_lvl_bits_tab(void *pDesc)
 {
@@ -160,9 +157,9 @@ void EL2_MMU_bootstrap(void)
 
 	// TODO: map these page tables somewhere, because currently EL1 cannot access them,
 	//  which is a problem.
-	struct armv8mmu_lvl2_block_desc kern_pgdir = {
-
-	};
+//	struct armv8mmu_lvl2_block_desc kern_pgdir = {
+//
+//	};
 
 	/* map KERN_VM_BASE to &_start (0x80000) */
 	table_idx = ((armv8_vaddr) KERN_VM_BASE).L2;
@@ -203,14 +200,3 @@ void EL2_MMU_bootstrap(void)
 	asm volatile ("isb" : : : "memory");
 
 }
-
-void init_mmu(void *x0)
-{
-
-
-
-//	map_kernel();
-}
-
-static void map_kernel()
-{}

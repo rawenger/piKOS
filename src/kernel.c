@@ -48,7 +48,8 @@ static void irq_init()
 // TODO: rename this LOL
 static void init_stuff(void)
 {
-	init_kmalloc();
+	// commented out until kernel heap layout set up
+//	init_kmalloc();
 }
 
 extern void *kern_img_end;
@@ -78,7 +79,7 @@ _Noreturn void kernel_main(void)
 	       "image size: 0x%lx\r\n",
 	       start, &kern_img_end, (void *) &kern_img_end - (void *) start);
 
-//	init_stuff();
+	init_stuff();
 
 	while (1) {
 

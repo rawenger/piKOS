@@ -22,4 +22,5 @@
 #include "util/memorymap.h"
 
 
-void init_mmu(void *x0);
+/** ONLY CALLABLE FROM EL2!! */
+void EL2_MMU_bootstrap(void);
