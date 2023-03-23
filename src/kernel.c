@@ -52,8 +52,6 @@ static void init_stuff(void)
 }
 
 extern void *kern_img_end;
-void * (*start) (void);
-void *kern_img_start = (void *) 0xFFFF'0000'0000'0000;
 
 _Noreturn void kernel_main(void)
 {
@@ -73,10 +71,12 @@ _Noreturn void kernel_main(void)
 	assert(el > 0);
 	printk("Running in EL %lu\r\n", el);
 
-	printk("kernel image start: %p\r\n"
-	       "kernel image end: %p\r\n"
+	void *start = (void *) (KERN_VM_BASE | KERN_IMG_START_PHYS);
+
+	printk("kernel image vm_start: %p\r\n"
+	       "kernel image vm_end: %p\r\n"
 	       "image size: 0x%lx\r\n",
-	       &start, &kern_img_end, (void *) &kern_img_end - (void *) &start);
+	       start, &kern_img_end, (void *) &kern_img_end - (void *) start);
 
 //	init_stuff();
 

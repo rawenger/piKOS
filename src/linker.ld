@@ -1,3 +1,5 @@
+
+
 ENTRY(_start)
 
 SECTIONS
@@ -30,11 +32,13 @@ SECTIONS
         bss_end = .;
     }
 
-    . = ALIGN(0x1000);
-    pg_root = .;
-    .pgdesc_area : {
-        . += (5 * 0x1000);
-    }
+/* we may end up using this later, but for now it's unused */
+/*    . = ALIGN(0x1000);*/
+/*    pg_root = .;*/
+/*    .pgdesc_area : {*/
+/*        . += (5 * 0x1000);*/
+/*    }*/
+/**/
 
     kern_img_end = .;
 }

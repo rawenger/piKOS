@@ -54,8 +54,8 @@ union armv8mmu_lvl0_desc *kern_pt_base_pm =
 	(union armv8mmu_lvl0_desc *) (PAGETABLE_START_PHYS);
 
 /* virtual address of kernel base page table(s) */
-union armv8mmu_lvl0_desc *kern_pt_base_vm =
-	(union armv8mmu_lvl0_desc *) &pg_root;
+//union armv8mmu_lvl0_desc *kern_pt_base_vm =
+//	(union armv8mmu_lvl0_desc *) &pg_root;
 
 /*
  * This function sets up and configures initial EL1&0 kernel address translation.
