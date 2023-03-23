@@ -1,95 +1,57 @@
-//
-// memorymap.h
-//
-// Memory addresses and sizes (for AArch64)
-//
-// Parts of this file are adapted from Circle - A C++ bare metal environment for Raspberry Pi
-//   defined in include/circle/memorymap64.h
-//   Copyright (C) 2014-2020  R. Stange <rsta2@o2online.de>
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+/*
+ * memorymap.h
+ *
+ * piKOS: a minimal OS for Raspberry Pi 3 & 4
+ *
+ * Memory addresses and sizes (for AArch64)
+ */
+
 #pragma once
 
+#ifndef KILOBYTE
+#define KILOBYTE        (0x400UL)
+#endif
 #ifndef MEGABYTE
-
-#define MEGABYTE	0x100000
+#define MEGABYTE	(KILOBYTE * KILOBYTE)
 #endif
 #ifndef GIGABYTE
-#define GIGABYTE	0x40000000UL
+#define GIGABYTE	(MEGABYTE * KILOBYTE)
 #endif
 
-#define CORES			4				// must be a power of 2
+/* All of this is drawn out in Notability, just waiting to copy diagram
+ *  into ASCII here until it's all actually finalized.
+ */
 
-#define KERNEL_MAX_SIZE         (2 * MEGABYTE)
+#define CORES			1 // must be a power of 2
 
-#define MEM_SIZE		(512 * MEGABYTE)		// default size
-#define GPU_MEM_SIZE		(64 * MEGABYTE)			// set in config.txt
-#define ARM_MEM_SIZE		(MEM_SIZE - GPU_MEM_SIZE)	// normally overwritten
+#define KERNEL_IMG_MAX_SIZE     (2 * MEGABYTE) // can't be larger than MMU level 2 block descriptor
 
-#define PAGE_SIZE		0x10000				// page size used by us
+#define PAGE_SIZE		0x1000U	 // 4K pages
+#define PAGESIZE                PAGE_SIZE
+#define KERN_PGDIR_SIZE         (5 * PAGESIZE)
+#define KERN_VM_BASE            (0xFFFFUL << 48)
 
-#define KERNEL_STACK_SIZE	0x20000
-#define EXCEPTION_STACK_SIZE	0x8000
-#define PAGE_RESERVE		(16 * MEGABYTE)
+#define STACK_SIZE              (128 * KILOBYTE) // kernel + exception stacks
+#define EXCEPTION_STACK_SIZE    (STACK_SIZE / 4)
+#define KERN_STACK_SIZE         (3 * EXCEPTION_STACK_SIZE)
 
-#define MEM_KERNEL_START	0x80000					// main code starts here
-#define MEM_KERNEL_END		(MEM_KERNEL_START + KERNEL_MAX_SIZE)
-#define MEM_KERNEL_STACK	(MEM_KERNEL_END + KERNEL_STACK_SIZE)	// expands down
-#define MEM_EXCEPTION_STACK	(MEM_KERNEL_STACK + KERNEL_STACK_SIZE * (CORES-1) + EXCEPTION_STACK_SIZE)
-#define MEM_EXCEPTION_STACK_END	(MEM_EXCEPTION_STACK + EXCEPTION_STACK_SIZE * (CORES-1))
+#define PAGETABLE_START_PHYS    (PAGESIZE) // could start at physical 0x0, but that just feels wrong...
+#define KERN_IMG_START_PHYS	0x80000UL // _start gets loaded here
+#define KERN_IMG_END_PHYS       (KERN_IMG_START_PHYS + KERNEL_IMG_MAX_SIZE)
+// very top of kernel phys address space
+#define KERN_STACK_BASE_PHYS	(192 * MEGABYTE) // bottom/high addr, used by some EL2 setup.
+// TODO: update once MMU code working
+#define KERN_STACK_BASE_VM      (KERN_VM_BASE + KERNEL_IMG_MAX_SIZE + STACK_SIZE) // bottom/initial sp
+//#define MEM_KERNEL_STACK_END    (KERN_STACK_TOP_PHYS - 128 * KILOBYTE) // bottom/low addr
+#define EXCEPTION_STACK_BASE_PHYS        (KERN_STACK_BASE_PHYS - KERN_STACK_SIZE)
+//#define MEM_EXCEPTION_STACK_END	(EXCEPTION_STACK_TOP_PHYS + EXCEPTION_STACK_SIZE * (CORES-1))
 
-#if RASPPI <= 3
-// coherent memory region (1 MB)
-#define MEM_COHERENT_REGION	((MEM_EXCEPTION_STACK_END + 2*MEGABYTE) & ~(MEGABYTE-1))
+// TODO: update once MMU code working
+#define EXCEPTION_STACK_BASE_VM         (KERN_STACK_BASE_VM - KERN_STACK_SIZE) // bottom/initial sp
 
-#define MEM_HEAP_START		(MEM_COHERENT_REGION + MEGABYTE)
-#else
-// coherent memory region (4 MB)
-#define MEM_COHERENT_REGION	((MEM_EXCEPTION_STACK_END + 2*MEGABYTE) & ~(MEGABYTE-1))
-
-#define MEM_HEAP_START		(MEM_COHERENT_REGION + 4*MEGABYTE)
-#endif
-
-#if RASPPI >= 4
-// high memory region (memory >= 3 GB is not safe to be DMA-able and is not used)
-#define MEM_HIGHMEM_START		GIGABYTE
-#define MEM_HIGHMEM_END			(3 * GIGABYTE - 1)
-
-// PCIe memory range (outbound)
-#define MEM_PCIE_RANGE_START		0x600000000UL
-#define MEM_PCIE_RANGE_SIZE		0x4000000UL
-#define MEM_PCIE_RANGE_PCIE_START	0xF8000000UL		// mapping on PCIe side
-#define MEM_PCIE_RANGE_START_VIRTUAL	MEM_PCIE_RANGE_START
-#define MEM_PCIE_RANGE_END_VIRTUAL	(MEM_PCIE_RANGE_START_VIRTUAL + MEM_PCIE_RANGE_SIZE - 1UL)
-
-// PCIe memory range (inbound)
-#define MEM_PCIE_DMA_RANGE_START	0UL
-#define MEM_PCIE_DMA_RANGE_SIZE		0x100000000UL
-#define MEM_PCIE_DMA_RANGE_PCIE_START	0UL			// mapping on PCIe side
-#endif
-
-//#define PAGE_SHIFT	 		12
-//#define TABLE_SHIFT 			9
-//#define SECTION_SHIFT			(PAGE_SHIFT + TABLE_SHIFT)
-//
-//#define PAGE_SIZE   			(1 << PAGE_SHIFT)
-//#define SECTION_SIZE			(1 << SECTION_SHIFT)
-//
-//#define LOW_MEMORY              	(2 * SECTION_SIZE)
-//
-//#define SECONDARY_STACK_START		(1 << 20)
+// TODO: update these once VM layout finalized
+#define MEM_HEAP_START		(KERN_STACK_BASE_PHYS - STACK_SIZE - KERN_IMG_END_PHYS)
+#define MEM_HEAP_MAXSIZE        (MEM_HEAP_START + 4 * MEGABYTE) // this can be revised
 
 #ifndef __ASSEMBLER__
 

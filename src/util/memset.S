@@ -23,7 +23,7 @@
 #define dstend	x4
 #define zva_val	x5
 
-ENTRY (__memset_aarch64)
+ENTRY (memset)
 	PTR_ARG (0)
 	SIZE_ARG (2)
 
@@ -115,5 +115,5 @@ L(no_zva_loop):
 	stp	q0, q0, [dstend, -32]
 	ret
 
-END (__memset_aarch64)
+END (memset)
 

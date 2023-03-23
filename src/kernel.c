@@ -18,28 +18,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdint.h>
+#include <assert.h>
 
 #include "mmio.h"
 #include "types.h"
+#include "kmalloc.h"
 #include "util/utils.h"
 #include "peripherals/uart0.h"
 #include "peripherals/mini_uart.h"
+#include "util/memorymap.h"
+#include "vm_kernel.h"
 
 static void irq_init()
 {
-	mmio_write32(ARM_IC_FIQ_CONTROL, 0); // completely disable FIQ's -- Linux does not use them so neither will we
-	mmio_write32(ARM_IC_DISABLE_IRQS_1, -1);
-	mmio_write32(ARM_IC_DISABLE_IRQS_2, -1);
-	mmio_write32(ARM_IC_DISABLE_BASIC_IRQS, -1);
-	mmio_write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
+	vmmio_write32(ARM_IC_FIQ_CONTROL, 0); // completely disable FIQ's -- Linux does not use them so neither will we
+	vmmio_write32(ARM_IC_DISABLE_IRQS_1, -1);
+	vmmio_write32(ARM_IC_DISABLE_IRQS_2, -1);
+	vmmio_write32(ARM_IC_DISABLE_BASIC_IRQS, -1);
+	vmmio_write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
 
 //	mmio_write32(ARM_IC_ENABLE_IRQS_1, ARM_IRQ_TIMER1);
-	mmio_write32(ARM_IC_ENABLE_IRQS_2, ARM_IRQ_UART);
+	vmmio_write32(ARM_IC_ENABLE_IRQS_2, ARM_IRQ_UART);
 
 	enable_irq();
 }
+
+/* Initialize libraries, software layer stuff. Don't put driver code in here! */
+// TODO: rename this LOL
+static void init_stuff(void)
+{
+	init_kmalloc();
+}
+
+extern void *kern_img_end;
+void * (*start) (void);
+void *kern_img_start = (void *) 0xFFFF'0000'0000'0000;
 
 _Noreturn void kernel_main(void)
 {
@@ -49,26 +63,25 @@ _Noreturn void kernel_main(void)
 	muart_init(); // miniUART
 	muart_send_str("miniUART initialized\r\n");
 #endif
-
 	uart0_init();
-
 	irq_init();
 
 	uint64_t el;
 	asm volatile ("\tmrs %0, CurrentEL\n"
 		      "\tlsr %0, %0, #2\n"
 		      : "=r" (el));
-	muart_send_str("Running in EL ");
-	muart_send('0' + el);
-	muart_send_str("\r\n");
+	assert(el > 0);
+	printk("Running in EL %lu\r\n", el);
 
-	char c;
-	muart_send_str("here\r\n");
-	//asm volatile ("\nsvc #0\t");
+	printk("kernel image start: %p\r\n"
+	       "kernel image end: %p\r\n"
+	       "image size: 0x%lx\r\n",
+	       &start, &kern_img_end, (void *) &kern_img_end - (void *) &start);
+
+//	init_stuff();
+
 	while (1) {
-//		c = uart0_recv();
-//		uart0_send(c);
+
 	}
 }
-
 

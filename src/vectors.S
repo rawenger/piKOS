@@ -10,6 +10,8 @@
         .endm
 
         .macro invalid_exception eType
+        mrs     x6, CurrentEL // grab this first for Reasons
+        lsr     x6, x6, #2
 #ifdef DEBUG
         /* Save some important debug info to pass into
          * our exception handler.
@@ -22,14 +24,15 @@
         mrs     x3, sp_el0
         mov     x4, lr // (ra)
         mov     x5, sp // (including the stack itself)
-        stp     x4, x5, [sp, #-16]!
-        stp     x2, x3, [sp, #-16]!
-        stp     x0, x1, [sp, #-16]!
-        mov     x1, sp
+        stp     x1, x0, [sp, #-16]!
+        stp     x3, x2, [sp, #-16]!
+        stp     x5, x4, [sp, #-16]!
+        mov     x2, sp
 #else
-        mov     x1, xzr
+        mov     x2, xzr
 #endif
-        /* call InvalidExceptionHandler */
+        /* call _Noreturn void InvalidExceptionHandler(int type, int currentEL, struct ExceptionContext *context) */
+        mov     w1, w6
         mov     w0, \eType
         b       InvalidExceptionHandler
 
@@ -37,7 +40,9 @@
 
         /* If from_kern is 1 then we are being entered
          * from the kernel and need to save sp, rather
-         * than sp_el0.
+         * than sp_el0. We also don't plan to use the
+         * VFP registers in the kernel (as of this writing),
+         * so don't need to save off those.
          *
          * We set up the stack to look like this:
          *
@@ -68,6 +73,11 @@
          * makes it easier to align the odd number of GP regs
          * at the top of the stack.
          */
+#if !defined(SAVE_VFP_REGS_FROM_EL1) || SAVE_VFP_REGS_FROM_EL1 != 1
+        .if \from_kern == 0
+#else
+        .if 1
+#endif
         stp     q30, q31, [sp, #-32]!
         stp     q28, q29, [sp, #-32]!
         stp     q26, q27, [sp, #-32]!
@@ -84,6 +94,7 @@
         stp     q4, q5, [sp, #-32]!
         stp     q2, q3, [sp, #-32]!
         stp     q0, q1, [sp, #-32]!
+        .endif
 
         stp     x27, x28, [sp, #-16]!
         stp     x25, x26, [sp, #-16]!
@@ -134,6 +145,11 @@
         ldp     x27, x28, [sp], #16
 
         /* VFP regs */
+#if !defined(SAVE_VFP_REGS_FROM_EL1) || SAVE_VFP_REGS_FROM_EL1 != 1
+        .if \to_kern == 0
+#else
+        .if 1
+#endif
         ldp     q0, q1, [sp], #32
         ldp     q2, q3, [sp], #32
         ldp     q4, q5, [sp], #32
@@ -150,6 +166,7 @@
         ldp     q26, q27, [sp], #32
         ldp     q28, q29, [sp], #32
         ldp     q30, q31, [sp], #32
+        .endif
 
         /* el1 stack & return address */
         ldp     x29, x30, [sp], #16

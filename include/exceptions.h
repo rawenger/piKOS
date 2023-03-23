@@ -11,6 +11,12 @@
 #define E_BADIRQ        4
 #define E_TODO          5
 
+/* Disable saving of the floating point/SIMD registers on exception entry
+ * if we are coming from the kernel, since the kernel does not use these.
+ * Set to 1 to enable saving them.
+ */
+#define SAVE_VFP_REGS_FROM_EL1  0
+
 #ifndef __ASSEMBLER__
 #ifdef DEBUG
 struct ExceptionContext {
@@ -19,7 +25,7 @@ struct ExceptionContext {
 	void *sp_el0;
 	void *elr_el1;
 	void *spsr_el1;
-	void *esr_el1;
+	unsigned long esr_el1;
 };
 
 #else // #ifdef DEBUG
@@ -48,7 +54,7 @@ void call_KOS_handler(IntType which);
  */
 extern void register_isr(IntType which, int_handler_t handler);
 
-_Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *context);
+_Noreturn void InvalidExceptionHandler(int type, int currentEL, struct ExceptionContext *context);
 /* Actual handler called by the stub in the hardware vector table */
 void irq_handler(void);
 #endif // #ifndef __ASSEMBLER__

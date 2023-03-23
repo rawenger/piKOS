@@ -5,6 +5,7 @@
 #include "exceptions.h"
 #include "peripherals/mini_uart.h"
 #include "mmio.h"
+#include "printk.h"
 
 extern void uart0_irq_handler(void);
 
@@ -17,7 +18,7 @@ void call_KOS_handler(IntType which)
 }
 
 __attribute__((optimize(0))) // prevent compiler optimizing out `context` parameter
-_Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *context)
+_Noreturn void InvalidExceptionHandler(int type, int currentEL, struct ExceptionContext *context)
 {
 #ifdef DEBUG
 	muart_send_str("Invalid exception: ");
@@ -38,7 +39,7 @@ _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *contex
 			muart_send_str("E_TODO\r\n");
 			break;
 		default:
-			muart_send_str("Unkown\r\n");
+			muart_send_str("Unknown\r\n");
 	}
 #endif
 	// TRAP here to read out members of `context` because
@@ -47,20 +48,18 @@ _Noreturn void InvalidExceptionHandler(int type, struct ExceptionContext *contex
 		;
 }
 
+__attribute__((optimize(3)))
 void irq_handler(void)
 {
-#ifdef DEBUG
-	muart_send_str("inside irq_handler()\r\n");
-#endif
 	/* We have 3 registers for the pending IRQ's, but for our purposes
 	 * the only IRQ's we *should* be dealing with are timer interrupts
 	 * and console read/write interrupts (a.k.a. UART0 interrupts).
 	 * Just to be safe, let's still just check everything
 	 */
 	uint32_t pending[3] = {
-		mmio_read32(ARM_IC_IRQ_PENDING_1),
-		mmio_read32(ARM_IC_IRQ_PENDING_2),
-		mmio_read32(ARM_IC_IRQ_BASIC_PENDING) & 0xFF,
+		vmmio_read32(ARM_IC_IRQ_PENDING_1),
+		vmmio_read32(ARM_IC_IRQ_PENDING_2),
+		vmmio_read32(ARM_IC_IRQ_BASIC_PENDING) & 0xFF,
 	};
 
 	for (unsigned reg = 0; reg < 3; reg++) {
@@ -78,17 +77,11 @@ void irq_handler(void)
 			uart0_irq_handler();
 			return;
 		}
-		mmio_write32(ARM_IC_IRQ_PENDING_1, 0);
-		mmio_write32(ARM_IC_IRQ_PENDING_2, 0);
-		mmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);
+		vmmio_write32(ARM_IC_IRQ_PENDING_1, 0);
+		vmmio_write32(ARM_IC_IRQ_PENDING_2, 0);
+		vmmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);
 #ifdef DEBUG
-		/* TODO: make a printk or something */
-		/*            0123456789 123456789 123456789 */
-		char msg[] = "IRQ #$$ asserted on line $\r\n";
-		msg[5] = '0' + (irq_n / 10);
-		msg[6] = '0' + (irq_n % 10);
-		msg[25] = '1' + reg;
-		muart_send_str(msg);
+		printk("IRQ #%d asserted on line %d\r\n", irq_n, reg);
 #endif
 
 	}
