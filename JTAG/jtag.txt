@@ -1,0 +1,14 @@
+JTAG port layout
+
+(Note: D0-D7 pins on Adafruit FT232H are ADBUS0-7; C0-C9 are ACBUS0-9.
+ See https://learn.adafruit.com/adafruit-ft232h-breakout/wiring)
+	FT232H	JTAG	GPIO	Pin #	wire color
+
+	ADBUS0	TCK	25	22	grey
+	ADBUS1	TDI	26	37	white
+	ADBUS2	TDO	24	18	violet
+	ADBUS3	TMS	27	13	yellow
+	ACBUS0	/TRST	22	15	green
+	ACBUS1	/SRST	23	16	blue
+		RCLK	n/a
+	GND		GND	39	black
