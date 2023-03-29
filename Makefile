@@ -43,6 +43,7 @@ CXX=$(PREFIX)g++
 AS=$(PREFIX)as
 LD=$(PREFIX)ld
 OBJCOPY=$(PREFIX)objcopy
+OPENOCD=openocd
 
 C_INCLUDES  = include # quote to distinguish from builtin make directive
 AS_INCLUDES = include
@@ -125,6 +126,10 @@ qemu-gdb: $(KERNEL).img
 	@echo "Attach to serial console with 'telnet 127.0.0.1 1236'"
 	qemu-system-aarch64 -serial telnet:127.0.0.1:1236,server $(QEMU_FLAGS) -S -gdb tcp::18427 -kernel $<
 
+jtag-gdb: $(KERNEL).img
+	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333' -ex 'load'"
+	openocd -f JTAG/um232h.cfg -f JTAG/rpi3.cfg
+
 
 clean:
 	@echo "  CLEAN $(BUILD_DIR)"
@@ -132,4 +137,4 @@ clean:
 	@rm -rf $(BUILD_DIR) $(KERNEL).img
 
 
-.PHONY: qemu qemu-gdb clean all
+.PHONY: qemu qemu-gdb jtag-gdb clean all
