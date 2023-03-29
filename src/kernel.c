@@ -62,8 +62,8 @@ _Noreturn void kernel_main(void)
 	muart_init(); // miniUART
 	muart_send_str("miniUART initialized\r\n");
 #endif
-	uart0_init();
-	irq_init();
+	//uart0_init();
+	//irq_init();
 
 	u64 el;
 	asm volatile ("\tmrs %0, CurrentEL\n"

@@ -90,7 +90,7 @@
          * makes it easier to align the odd number of GP regs
          * at the top of the stack.
          */
-#if !defined(SAVE_VFP_REGS_FROM_EL1) || SAVE_VFP_REGS_FROM_EL1 != 1
+#ifndef SAVE_VFP_REGS_FROM_EL1
         .if \from_kern == 0
 #else
         .if 1
@@ -162,7 +162,7 @@
         ldp     x27, x28, [sp], #16
 
         /* VFP regs */
-#if !defined(SAVE_VFP_REGS_FROM_EL1) || SAVE_VFP_REGS_FROM_EL1 != 1
+#ifndef SAVE_VFP_REGS_FROM_EL1
         .if \to_kern == 0
 #else
         .if 1

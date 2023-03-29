@@ -29,6 +29,7 @@
  */
 
 #include "util/asmdefs.h"
+#define SKIP_ZVA_CHECK  /* avoid fault before turning on MMU */
 
 #define dstin	x0
 #define val	x1
@@ -110,7 +111,7 @@ L(set_long):
 	.p2align 4
 L(zva_loop):
 	add	dst, dst, 64
-	dc	zva, dst
+	//dc	zva, dst    // TODO: don't forget about this after enabling caches
 	subs	count, count, 64
 	b.hi	L(zva_loop)
 	stp	q0, q0, [dstend, -64]

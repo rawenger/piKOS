@@ -127,8 +127,8 @@ qemu-gdb: $(KERNEL).img
 	qemu-system-aarch64 -serial telnet:127.0.0.1:1236,server $(QEMU_FLAGS) -S -gdb tcp::18427 -kernel $<
 
 jtag-gdb: $(KERNEL).img
-	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333' -ex 'load'"
-	openocd -f JTAG/um232h.cfg -f JTAG/rpi3.cfg
+	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333' -ex 'monitor load_image $(KERNEL).img $(INITADDR)' -ex 'monitor set_reg {pc $(INITADDR)}'"
+	$(OPENOCD) -f JTAG/um232h.cfg -f JTAG/rpi3.cfg
 
 
 clean:
