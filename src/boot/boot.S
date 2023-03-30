@@ -79,7 +79,7 @@
 	.endm
 
 
-.section .text.boot
+.section .text.boot, "x"
 
         .globl _start
 _start: /* Entered from armstub8 while in EL2 after boot */

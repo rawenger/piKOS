@@ -30,6 +30,20 @@
 #include "util/memorymap.h"
 #include "vm_kernel.h"
 
+/* from PlutoniumBob@raspi-forum */
+// Power Manager
+#define ARM_PM_RSTC     (ARM_PM_BASE + 0x1C)
+#define ARM_PM_WDOG     (ARM_PM_BASE + 0x24)
+#define   ARM_PM_PASSWD   (0x5A << 24)
+#define   PM_RSTC_WRCFG_FULL_RESET 0x20
+
+static void SystemReboot(void)
+{
+        printk("System rebooting...");
+        vmmio_write32(ARM_PM_WDOG, ARM_PM_PASSWD | 1); // one second timeout
+        vmmio_write32(ARM_PM_RSTC, ARM_PM_PASSWD | PM_RSTC_WRCFG_FULL_RESET);
+}
+
 static void irq_init()
 {
 	vmmio_write32(ARM_IC_FIQ_CONTROL, 0); // completely disable FIQ's -- Linux does not use them so neither will we

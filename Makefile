@@ -9,11 +9,13 @@ ifeq ($(strip $(RASPPI)), 3)
 	INITADDR    = 0x80000
 	QEMU_FLAGS += -M raspi3b -nographic #-no-reboot
 	QEMU_FLAGS += -monitor telnet:127.0.0.1:1235,server,nowait
+	OPENOCD_CFG = rpi3.cfg
 else
 	ifeq ($(strip $(RASPPI)), 4)
-		TARGET_CPU = cortex-a72
-		KERNEL 	   = kernel8-rpi4
-		INITADDR   = 0x80000
+		TARGET_CPU  = cortex-a72
+		KERNEL 	    = kernel8-rpi4
+		INITADDR    = 0x80000
+		OPENOCD_CFG = rpi4b.cfg
 	else # not supported
 		TARGET_CPU =
 		KERNEL 	   = kernel7
@@ -126,10 +128,21 @@ qemu-gdb: $(KERNEL).img
 	@echo "Attach to serial console with 'telnet 127.0.0.1 1236'"
 	qemu-system-aarch64 -serial telnet:127.0.0.1:1236,server $(QEMU_FLAGS) -S -gdb tcp::18427 -kernel $<
 
-jtag-gdb: $(KERNEL).img
-	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333' -ex 'monitor load_image $(KERNEL).img $(INITADDR)' -ex 'monitor set_reg {pc $(INITADDR)}'"
-	$(OPENOCD) -f JTAG/um232h.cfg -f JTAG/rpi3.cfg
+openocd: $(KERNEL).img
+	@echo "Programming board..."
+	$(OPENOCD) -f JTAG/$(OPENOCD_CFG) -c 'program dummyarg'
 
+# GDB setup; used by IDE run configuration
+gdb-setup: $(KERNEL).img reboot
+
+jtag-gdb: gdb-setup
+	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333'"
+	$(OPENOCD) -f JTAG/$(OPENOCD_CFG) -c load
+
+reboot:
+	@echo "Rebooting target..."
+	-@$(OPENOCD) -f JTAG/$(OPENOCD_CFG) -c 'reboot'
+	@sleep 2
 
 clean:
 	@echo "  CLEAN $(BUILD_DIR)"
@@ -137,4 +150,4 @@ clean:
 	@rm -rf $(BUILD_DIR) $(KERNEL).img
 
 
-.PHONY: qemu qemu-gdb jtag-gdb clean all
+.PHONY: qemu qemu-gdb jtag-gdb clean all openocd reboot gdb-setup
