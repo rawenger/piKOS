@@ -28,10 +28,12 @@
 #define E_TODO          5
 
 /* Disable saving of the floating point/SIMD registers on exception entry
- * if we are coming from the kernel. Currently, the memset and memcpy routines
- * from ARM use SIMD, so we need to save these from EL1.
+ * if we are coming from the kernel. Currently, the memset routine
+ * from ARM only uses q0, so we always save that when taking an exception;
+ * otherwise, uncomment the following #define to save *all* the VFP registers.
+ * All of the C code in the kernel is compiled with -mgeneral-regs-only.
  */
-#define SAVE_VFP_REGS_FROM_EL1
+//#define SAVE_VFP_REGS_FROM_EL1
 
 #ifndef __ASSEMBLER__
 #ifdef DEBUG

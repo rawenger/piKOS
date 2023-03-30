@@ -51,7 +51,7 @@ C_INCLUDES  = include # quote to distinguish from builtin make directive
 AS_INCLUDES = include
 
 CFLAGS  += -Wall -std=gnu2x # constexpr FINALLY!
-CFLAGS  += -nostdlib -nostartfiles -ffreestanding
+CFLAGS  += -nostdlib -nostartfiles -ffreestanding -mgeneral-regs-only
 CFLAGS	+= -mcpu=$(TARGET_CPU)
 CFLAGS  += -DRASPPI=$(RASPPI) -DAARCH=$(AARCH)
 ASFLAGS += # add more here when necessary
@@ -136,7 +136,7 @@ openocd: $(KERNEL).img
 gdb-setup: $(KERNEL).img reboot
 
 jtag-gdb: gdb-setup
-	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333'"
+	@echo "Attach debugger with $(PREFIX)gdb $(BUILD_DIR)/$(KERNEL).elf -ex 'target extended-remote :3333' -ex 'tb *0x80078'"
 	$(OPENOCD) -f JTAG/$(OPENOCD_CFG) -c load
 
 reboot:

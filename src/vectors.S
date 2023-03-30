@@ -110,8 +110,10 @@
         stp     q6, q7, [sp, #-32]!
         stp     q4, q5, [sp, #-32]!
         stp     q2, q3, [sp, #-32]!
-        stp     q0, q1, [sp, #-32]!
+        str     q1, [sp, #-16]!
         .endif
+        /* Save q0 unconditionally, as it is used by memset() */
+        str     q0, [sp, #-16]!
 
         stp     x27, x28, [sp, #-16]!
         stp     x25, x26, [sp, #-16]!
@@ -162,12 +164,13 @@
         ldp     x27, x28, [sp], #16
 
         /* VFP regs */
+        ldr     q0, [sp], #16
 #ifndef SAVE_VFP_REGS_FROM_EL1
         .if \to_kern == 0
 #else
         .if 1
 #endif
-        ldp     q0, q1, [sp], #32
+        ldr     q1, [sp], #16
         ldp     q2, q3, [sp], #32
         ldp     q4, q5, [sp], #32
         ldp     q6, q7, [sp], #32
