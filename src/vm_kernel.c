@@ -74,11 +74,13 @@ union armv8mmu_lvl0_desc *kern_pt_base_pm =
  * page table definitions over in armv8mmu.h), so I'm doing this in C rather than assembler
  * for that reason.
  */
+
 void EL2_MMU_bootstrap(void)
 {
 	/* TODO: refactor most of this */
 	// zero the initial ptable area in the kernel image
-	memset(kern_pt_base_pm, 0, KERN_PGDIR_SIZE);
+        for (size_t i = 0; i < KERN_PGDIR_SIZE/sizeof(u64); i++)
+                ((u64 *) kern_pt_base_pm)[i] = 0UL;
 
 	union armv8mmu_lvl1_desc *kern_l1 =
 		(union armv8mmu_lvl1_desc *) (kern_pt_base_pm + PAGESIZE);
