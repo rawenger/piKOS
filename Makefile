@@ -97,25 +97,25 @@ DEP_FILES = $(OBJ_FILES:$%.o=%.d)
 
 $(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
-	@echo "  CC    $<"
+	@echo "  CC      $<"
 	@$(CC) $(CFLAGS) -MMD -c $< -o $@
 
 $(BUILD_DIR)/%_s.o: $(SRC_DIR)/%.s
 	@mkdir -p $(@D)
-	@echo "  AS    $<"
+	@echo "  AS      $<"
 	@$(AS) $(ASFLAGS) -MMD -c $< -o $@
 
 $(BUILD_DIR)/%_S.o: $(SRC_DIR)/%.S
 	@mkdir -p $(@D)
-	@echo "  AS    $<"
+	@echo "  AS      $<"
 	@$(CC) $(ASFLAGS) -MMD -c $< -o $@
 
 $(BUILD_DIR)/$(KERNEL).elf: $(SRC_DIR)/linker.ld $(OBJ_FILES)
-	@echo "  LD    $(KERNEL).elf"
+	@echo "  LD      $(KERNEL).elf"
 	@$(LD) $(LDFLAGS) -T $(SRC_DIR)/linker.ld -o $@  $(OBJ_FILES)
 
 $(KERNEL).img: $(BUILD_DIR)/$(KERNEL).elf
-	@echo "  COPY  $(KERNEL).img"
+	@echo "  COPY    $(KERNEL).img"
 	@$(OBJCOPY) $< -O binary $(KERNEL).img
 
 qemu: $(KERNEL).img
@@ -145,8 +145,8 @@ reboot:
 	@sleep 2
 
 clean:
-	@echo "  CLEAN $(BUILD_DIR)"
-	@echo "  CLEAN $(KERNEL).img"
+	@echo "  CLEAN   $(BUILD_DIR)"
+	@echo "  CLEAN   $(KERNEL).img"
 	@rm -rf $(BUILD_DIR) $(KERNEL).img
 
 

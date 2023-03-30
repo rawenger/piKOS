@@ -14,7 +14,6 @@ else
 	endif
 endif
 
-
 all: $(KERNEL).img
 
 install: all
