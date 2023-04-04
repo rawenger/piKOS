@@ -63,8 +63,9 @@ _Noreturn void InvalidExceptionHandler(int type, int currentEL, struct Exception
 	while (1)
 		;
 }
+extern void handle_timer_irq(void);
 
-__attribute__((optimize(2)))
+//__attribute__((optimize(2)))
 void irq_handler(void)
 {
 	/* We have 3 registers for the pending IRQ's, but for our purposes
@@ -93,6 +94,10 @@ void irq_handler(void)
 			uart0_irq_handler();
 			return;
 		}
+                if (reg == 0 && irq_n == __builtin_ctz(ARM_IRQ_TIMER1)) {
+                        handle_timer_irq();
+                        return;
+                }
 		vmmio_write32(ARM_IC_IRQ_PENDING_1, 0);
 		vmmio_write32(ARM_IC_IRQ_PENDING_2, 0);
 		vmmio_write32(ARM_IC_IRQ_BASIC_PENDING, 0);

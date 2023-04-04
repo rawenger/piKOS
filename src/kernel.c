@@ -29,6 +29,7 @@
 #include "peripherals/mini_uart.h"
 #include "util/memorymap.h"
 #include "vm_kernel.h"
+#include "peripherals/systimer.h"
 
 /* from PlutoniumBob@raspi-forum */
 // Power Manager
@@ -52,8 +53,8 @@ static void irq_init()
 	vmmio_write32(ARM_IC_DISABLE_BASIC_IRQS, -1);
 	vmmio_write32(ARM_LOCAL_TIMER_INT_CONTROL0, 0);
 
-//	mmio_write32(ARM_IC_ENABLE_IRQS_1, ARM_IRQ_TIMER1);
-	vmmio_write32(ARM_IC_ENABLE_IRQS_2, ARM_IRQ_UART);
+	vmmio_write32(ARM_IC_ENABLE_IRQS_1, ARM_IRQ_TIMER1);
+//	vmmio_write32(ARM_IC_ENABLE_IRQS_2, ARM_IRQ_UART);
 
 	enable_irq();
 }
@@ -67,6 +68,7 @@ static void init_stuff(void)
 }
 
 extern void *kern_img_end;
+extern void get_read(void);
 
 _Noreturn void kernel_main(void)
 {
@@ -74,10 +76,12 @@ _Noreturn void kernel_main(void)
 
 #ifdef DEBUG
 	muart_init(); // miniUART
-	muart_send_str("miniUART initialized\r\n");
+	muart_send_str("entered kernel\r\n");
+        delay(1000);
 #endif
-	//uart0_init();
-	//irq_init();
+//	uart0_init();
+        timer_init();
+	irq_init();
 
 	u64 el;
 	asm volatile ("\tmrs %0, CurrentEL\n"
@@ -94,9 +98,26 @@ _Noreturn void kernel_main(void)
 	       start, &kern_img_end, (void *) &kern_img_end - (void *) start);
 
 	init_stuff();
+//        char msg[17];
+//        int i;
+//        printk("enter something: \r\n");
+//        for (i = 0; i < 16; i++) {
+//                msg[i] = muart_recv();
+//                if (msg[i] == '\r')
+//                        break;
+//        }
+//        msg[i] = '\0';
+//        printk("\n\rread %d characters: '%s'\r\n", i, msg);
 
+
+//        delay(50000000);
+//        delay(500000000);
+//        disable_irq();
+//        muart_init();
+//        muart_send_str("PL011 read:\r\n");
+//        get_read();
 	while (1) {
-
+//                muart_send(muart_recv());
 	}
 }
 
