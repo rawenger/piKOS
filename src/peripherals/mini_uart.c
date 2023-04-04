@@ -32,7 +32,7 @@
 
 void muart_send(char c)
 {
-	while (!(vmmio_read32(MUART_LSR_REG) & 0x20)) ;
+	while ( !(vmmio_read32(MUART_LSR_REG) & (1 << 5)) ) ;
 
 	vmmio_write32(MUART_IO_REG, c);
 }
@@ -41,6 +41,14 @@ void muart_send_str(char* str)
 {
 	while (*str)
 		muart_send(*str++);
+}
+
+
+__attribute__((unused))
+char muart_recv(void)
+{
+	while( !(vmmio_read32(MUART_LSR_REG) & 1) ) ;
+	return vmmio_read32(MUART_IO_REG) & 0xFF;
 }
 
 void muart_init(void)
@@ -67,5 +75,5 @@ void muart_init(void)
 	vmmio_write32(MUART_MCR_REG, 0);                //Set RTS line to be always high
 	vmmio_write32(MUART_BD_REG, BAUD_RATE_115200); //Set baud rate to 115200
 
-	vmmio_write32(MUART_CR_REG, 3);               // enable transmitter and receiver
+	vmmio_write32(MUART_CR_REG, 0x3); // enable transmitter and receiver
 }

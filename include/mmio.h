@@ -162,19 +162,19 @@
 // TODO: go through datasheet and add in #define's for all the
 //   register bits. Haven't done that yet so the driver currently
 //   uses hardcoded hexadecimal literals.
-#define AUX_MU_BASE     (MMIO_BASE + 0x00215000U)
-#define MUART_EN        (AUX_MU_BASE + 0x4)
-#define MUART_IO_REG    (AUX_MU_BASE + 0x40)
-#define MUART_IER_REG   (AUX_MU_BASE + 0x44)
-#define MUART_IIR_REG   (AUX_MU_BASE + 0x48)
-#define MUART_LCR_REG   (AUX_MU_BASE + 0x4C)
-#define MUART_MCR_REG   (AUX_MU_BASE + 0x50)
-#define MUART_LSR_REG   (AUX_MU_BASE + 0x54)
-#define MUART_MSR_REG   (AUX_MU_BASE + 0x58)
-#define MUART_SCRATCH   (AUX_MU_BASE + 0x5C)
-#define MUART_CR_REG    (AUX_MU_BASE + 0x60)
-#define MUART_ST_REG    (AUX_MU_BASE + 0x64)
-#define MUART_BD_REG    (AUX_MU_BASE + 0x68)
+#define MUART_BASE     (MMIO_BASE + 0x00215000U)
+#define MUART_EN        (MUART_BASE + 0x4)
+#define MUART_IO_REG    (MUART_BASE + 0x40)
+#define MUART_IER_REG   (MUART_BASE + 0x44)
+#define MUART_IIR_REG   (MUART_BASE + 0x48)
+#define MUART_LCR_REG   (MUART_BASE + 0x4C)
+#define MUART_MCR_REG   (MUART_BASE + 0x50)
+#define MUART_LSR_REG   (MUART_BASE + 0x54)
+#define MUART_MSR_REG   (MUART_BASE + 0x58)
+#define MUART_SCRATCH   (MUART_BASE + 0x5C)
+#define MUART_CR_REG    (MUART_BASE + 0x60)
+#define MUART_ST_REG    (MUART_BASE + 0x64)
+#define MUART_BD_REG    (MUART_BASE + 0x68)
 
 /* These last 4 are "reserved for test purposes," according to ARM */
 #define UART0_ITCR      (UART0_BASE + 0x80)

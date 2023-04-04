@@ -123,7 +123,7 @@ qemu: $(KERNEL).img
 
 qemu-gdb: $(KERNEL).img
 	@echo "Attach debugger with"
-	@echo "$(PREFIX)gdb -ex 'target remote :18427' -ex 'monitor system_reset' $(BUILD_DIR)/$(KERNEL).elf"
+	@echo "$(PREFIX)gdb -ex 'target remote :18427' -ex 'monitor system_reset' -ex 'tb *0x80078' $(BUILD_DIR)/$(KERNEL).elf"
 	@echo "Attach to QEMU monitor with 'telnet 127.0.0.1 1235'"
 	@echo "Attach to serial console with 'telnet 127.0.0.1 1236'"
 	qemu-system-aarch64 -serial telnet:127.0.0.1:1236,server $(QEMU_FLAGS) -S -gdb tcp::18427 -kernel $<
