@@ -24,6 +24,7 @@
 
 #include "util/utils.h"
 #include "peripherals/mini_uart.h"
+#include "peripherals/gpio.h"
 #include "mmio.h"
 
 #define BAUD_RATE_REG_CALC(br)	((SYSTEM_CLOCK_FREQ / (8 * (br))) - 1)
@@ -53,20 +54,9 @@ char muart_recv(void)
 
 void muart_init(void)
 {
-	unsigned int selector;
-
-	selector = vmmio_read32(ARM_GPIO_GPFSEL1);
-	selector &= ~(7<<12);                   // clean gpio14
-	selector |= 2<<12;                      // set alt5 for gpio14
-	selector &= ~(7<<15);                   // clean gpio15
-	selector |= 2<<15;                      // set alt5 for gpio15
-	vmmio_write32(ARM_GPIO_GPFSEL1, selector);
-
-	vmmio_write32(ARM_GPIO_GPPUD, 0);
-	delay(150);
-	vmmio_write32(ARM_GPIO_GPPUDCLK0, (1 << 14) | (1 << 15));
-	delay(150);
-	vmmio_write32(ARM_GPIO_GPPUDCLK0, 0);
+	struct GPIOPin Tx, Rx;
+	GPIOPin_init(&Tx, 14, GPIO_AF5);
+	GPIOPin_init(&Rx, 15, GPIO_AF5);
 
 	vmmio_write32(MUART_EN, 1);                   //Enable mini uart (this also enables access to it registers)
 	vmmio_write32(MUART_CR_REG, 0);               //Disable auto flow control and disable receiver and transmitter (for now)
