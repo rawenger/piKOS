@@ -70,6 +70,7 @@ extern "C" {
 int printf_(const char* format, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
+#define printk(...)
 
 /**
  * Tiny sprintf implementation

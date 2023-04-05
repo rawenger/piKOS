@@ -19,9 +19,11 @@
  */
 
 #include "mmio.h"
+#include "exceptions.h"
 #include "util/utils.h"
 #include "peripherals/uart0.h"
-#include "exceptions.h"
+#include "peripherals/gpio.h"
+#include "peripherals/mini_uart.h"
 
 #define UART0_CLOCK	        (48000000UL)
 
@@ -32,20 +34,9 @@
 
 void uart0_init()
 {
-	u32 mask;
-
-	mask = vmmio_read32(ARM_GPIO_GPFSEL1);
-	mask &= ~(7 << 12); // reset gpio14
-	mask &= ~(7 << 15); // reset gpio15
-	mask &= ~(4 << 12); // set AF0 for gpio14
-	mask &= ~(4 << 15); // set AF0 for gpio15
-	vmmio_write32(ARM_GPIO_GPFSEL1, mask);
-
-	vmmio_write32(ARM_GPIO_GPPUD, 0);
-	delay(150);
-	vmmio_write32(ARM_GPIO_GPPUDCLK0, BIT(14) | BIT(15));
-	delay(150);
-	vmmio_write32(ARM_GPIO_GPPUDCLK0, 0);
+	struct GPIOPin Tx, Rx;
+	GPIOPin_init(&Tx, 14, GPIO_AF0);
+	GPIOPin_init(&Rx, 15, GPIO_AF0);
 
 	vmmio_write32(UART0_CR, 0); // disable
 	vmmio_write32(UART0_IBRD, IBRD_115200); // setup br 115200
@@ -64,12 +55,12 @@ void uart0_init()
 	vmmio_write32(UART0_CR, CR_UART_EN_MASK | CR_TXE_MASK | CR_RXE_MASK);
 }
 
-/* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
-static char console_read_char;
-
 __attribute__((optimize(2)))
 void uart0_irq_handler(void)
 {
+	/* purposely don't buffer this! we will do that in a separate kernel thread (watch_keyboard) */
+	static char console_read_char;
+
 	u32 int_type = vmmio_read32(UART0_MIS);
 	vmmio_write32(UART0_ICR, int_type);
 
@@ -87,6 +78,20 @@ void uart0_irq_handler(void)
 
 #ifdef DEBUG
 	if (int_type & ~(MIS_TXMIS | MIS_RXMIS))
-	printk("other interrupt occurred in uart0\r\n");
+		printk("other interrupt occurred in uart0\r\n");
 #endif
+}
+
+void uart0_send(char c)
+{
+	while (vmmio_read32(UART0_FR) & FR_TXFF_MASK)
+		;
+	vmmio_write32(UART0_DR, c);
+}
+
+char uart0_recv(void)
+{
+	while (vmmio_read32(UART0_FR) & FR_RXFE_MASK)
+		;
+	return vmmio_read32(UART0_DR);
 }

@@ -52,6 +52,13 @@
 
 // The base address for the PL011 UART.
 #define UART0_BASE      (GPIO_BASE + 0x1000) // for raspi4 0xFE201000, raspi2 & 3 0x3F201000, and 0x20201000 for raspi1
+#if RASPPI == 4
+#define UART1_BASE      (GPIO_BASE + 0x1400)
+#define UART2_BASE      (GPIO_BASE + 0x1600)
+#define UART3_BASE      (GPIO_BASE + 0x1800)
+#define UART4_BASE      (GPIO_BASE + 0x1A00)
+#endif
+
 
 // The offsets for reach register for the UART. (see ARMv8 spec sheet for A-profile)
 #define UART0_DR        (UART0_BASE + 0x00)     // Data Register

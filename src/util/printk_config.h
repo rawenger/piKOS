@@ -21,6 +21,7 @@
 #pragma once
 
 #include "peripherals/mini_uart.h"
+#include "peripherals/uart0.h"
 #define _putchar        muart_send
 
 /* Disable floating point printing */

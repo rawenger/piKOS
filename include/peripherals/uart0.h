@@ -22,3 +22,10 @@
 
 void uart0_init();
 
+void uart0_irq_handler(void);
+
+__attribute__((unused))
+void uart0_send(char c);
+
+__attribute__((unused))
+char uart0_recv(void);

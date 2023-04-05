@@ -19,11 +19,10 @@
  */
 
 #include "exceptions.h"
-#include "peripherals/mini_uart.h"
 #include "mmio.h"
 #include "printk.h"
-
-extern void uart0_irq_handler(void);
+#include "peripherals/uart0.h"
+#include "peripherals/mini_uart.h"
 
 static int_handler_t KOS_handlers[KOS_IRQ_NUM] = {NULL};
 
@@ -65,7 +64,7 @@ _Noreturn void InvalidExceptionHandler(int type, int currentEL, struct Exception
 }
 extern void handle_timer_irq(void);
 
-//__attribute__((optimize(2)))
+__attribute__((optimize(2)))
 void irq_handler(void)
 {
 	/* We have 3 registers for the pending IRQ's, but for our purposes
@@ -107,8 +106,6 @@ void irq_handler(void)
 
 	}
 }
-
-
 
 void register_isr(IntType which, int_handler_t handler)
 {
