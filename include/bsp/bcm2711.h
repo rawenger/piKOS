@@ -26,7 +26,7 @@
 
 #if RASPPI >= 4
 
-#include "peripherals/bcm2835.h"
+#include "bsp/bcm2835.h"
 
 //
 // External Mass Media Controller 2 (SD Card)

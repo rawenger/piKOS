@@ -189,12 +189,12 @@
 #define MBOX_WRITE      (MBOX_BASE + 0x20)
 
 
-#include "peripherals/bcm2835.h"
-#include "peripherals/bcm2836.h"
-#include "peripherals/bcm2835int.h"
+#include "bsp/bcm2835.h"
+#include "bsp/bcm2836.h"
+#include "bsp/bcm2835int.h"
 #if (RASPPI == 4)
-#include "peripherals/bcm2711.h"
-#include "peripherals/bcm2711int.h"
+#include "bsp/bcm2711.h"
+#include "bsp/bcm2711int.h"
 #endif
 
 static inline void vmmio_write32(uintptr reg, u32 data)

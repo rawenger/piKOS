@@ -30,7 +30,7 @@
 #pragma once
 
 #if RASPPI >= 4
-	#include "peripherals/bcm2711int.h"
+	#include "bsp/bcm2711int.h"
 #else
 
 // IRQs
