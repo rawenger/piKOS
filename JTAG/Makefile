@@ -7,7 +7,7 @@ ASFLAGS += -Wl,--section-start=.text.boot=0x80000
 
 HOST = $(strip $(shell uname -s))
 ifeq ($(HOST), Linux)
-	SDCARD_PATH ?= # TODO
+	SDCARD_PATH ?= /run/media/$(shell whoami)/boot
 else
 	ifeq ($(HOST), Darwin)
 		SDCARD_PATH ?= /Volumes/BOOT/
