@@ -3,6 +3,12 @@ AARCH = 64 # for now, 32-bit is unsupported
 DEBUG ?= 1 # set to 1 to enable debug info & define DEBUG macro
 OPTIMIZE_LEVEL ?= 3 # argument to the compiler's '-O' flag. Only applies to non-debug builds
 
+# Versioning
+VERSION_MAJOR  = 0
+VERSION_MINOR  = 01
+BUILD_TIME	   = $(shell date +"%Y%m%d.%H%M%S")
+VERSION_STRING = "\"${VERSION_MAJOR}.${VERSION_MINOR}.${BUILD_TIME}\""
+
 ifeq ($(strip ${RASPPI}), 3)
 	TARGET_CPU  = cortex-a53
 	KERNEL 	    = kernel8
@@ -10,15 +16,18 @@ ifeq ($(strip ${RASPPI}), 3)
 	QEMU_FLAGS += -M raspi3b -nographic #-no-reboot
 	QEMU_FLAGS += -monitor telnet:127.0.0.1:1235,server,nowait
 	OPENOCD_CFG = rpi3.cfg
+	QEMU 	   ?= 1
 else
 	ifeq ($(strip ${RASPPI}), 4)
 		TARGET_CPU  = cortex-a72
 		KERNEL 	    = kernel8-rpi4
 		INITADDR    = 0x80000
 		OPENOCD_CFG = rpi4b.cfg
+		QEMU 	   ?= 0
 	else # not supported
 		TARGET_CPU =
 		KERNEL 	   = kernel7
+		QEMU	  ?= 1
 	endif
 endif
 
@@ -54,8 +63,12 @@ AS_INCLUDES = include
 CFLAGS  += -Wall -std=gnu2x # constexpr FINALLY!
 CFLAGS  += -nostdlib -nostartfiles -ffreestanding -mgeneral-regs-only
 CFLAGS	+= -mcpu=${TARGET_CPU}
-CFLAGS  += -DRASPPI=${RASPPI} -DAARCH=${AARCH}
+CFLAGS  += -DRASPPI=${RASPPI} -DAARCH=${AARCH} -DVERSION_STRING=${VERSION_STRING}
 ASFLAGS += # add more here when necessary
+
+ifeq ($(strip ${QEMU}), 1)
+	CFLAGS += -DQEMU
+endif
 
 #LDFLAGS += --section-start=.text.boot=$(INITADDR)
 
@@ -65,10 +78,10 @@ ASFLAGS += $(addprefix -I, ${AS_INCLUDES})
 ifneq ($(strip ${DEBUG}), 1)
 	CFLAGS 		+= -O$(strip ${OPTIMIZE_LEVEL})
 else
-	CFLAGS		+= -g -Og -DDEBUG
-	ASFLAGS		+= -g -DDEBUG
+	CFLAGS		+= -g3 -Og -DDEBUG
+	ASFLAGS		+= -g3 -DDEBUG
 	# enable sending debug messages to stderr over the mini UART
-	QEMU_FLAGS	+= -chardev file,path=/dev/stderr,id=uart1 -serial chardev:uart1
+	QEMU_FLAGS	+= -chardev file,path=/dev/stderr,id=muart -serial chardev:muart
 endif
 
 
