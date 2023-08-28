@@ -54,26 +54,33 @@ void GPIOPin_init(struct GPIOPin *pin, u32 pin_num, GPIOPinMode mode)
 	assert(pin != NULL);
 	assert(pin_num < GPIO_PINS);
 	pin->pin_num = pin_num;
-	pin->reg_offset = (pin_num >> 5) << 2;
-	pin->reg_mask = 1 << (pin_num & 31);
+	pin->_p_reg_offset = (pin_num >> 5) << 2;
+	pin->_p_reg_mask = 1 << (pin_num & 31);
 
 	reset_pin(pin);
 	set_mode(pin, mode);
+}
+
+struct GPIOPin GPIOPin_create(u32 pin_num, GPIOPinMode mode)
+{
+	struct GPIOPin pin;
+	GPIOPin_init(&pin, pin_num, mode);
+	return pin;
 }
 
 void GPIOPin_write(struct GPIOPin *pin, BOOL val)
 {
 	assert(pin != NULL);
 
-	uintptr screg = pin->reg_offset + (val ? ARM_GPIO_GPSET0 : ARM_GPIO_GPCLR0);
-	vmmio_write32(screg, pin->reg_mask);
+	uintptr screg = pin->_p_reg_offset + (val ? ARM_GPIO_GPSET0 : ARM_GPIO_GPCLR0);
+	vmmio_write32(screg, pin->_p_reg_mask);
 }
 
 BOOL GPIOPin_read(struct GPIOPin *pin)
 {
 	assert(pin != NULL);
 
-	return (vmmio_read32(ARM_GPIO_GPLEV0 + pin->reg_offset) & pin->reg_mask)
+	return (vmmio_read32(ARM_GPIO_GPLEV0 + pin->_p_reg_offset) & pin->_p_reg_mask)
 		? TRUE : FALSE;
 }
 
@@ -115,10 +122,10 @@ static void set_pupd(struct GPIOPin *pin, GPIOPinPUPD pull_mode)
 {
 	assert(pull_mode <= PullUp);
 #if RASPPI == 3
-	uintptr clk_reg = ARM_GPIO_GPPUDCLK0 + pin->reg_offset;
+	uintptr clk_reg = ARM_GPIO_GPPUDCLK0 + pin->_p_reg_offset;
 	vmmio_write32(ARM_GPIO_GPPUD, pull_mode);
 	delay(150); // need to wait at least 1us
-	vmmio_write32(clk_reg, pin->reg_mask);
+	vmmio_write32(clk_reg, pin->_p_reg_mask);
 	delay(150);
 	vmmio_write32(ARM_GPIO_GPPUD, 0);
 	vmmio_write32(clk_reg, 0);

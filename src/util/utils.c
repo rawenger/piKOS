@@ -19,6 +19,7 @@
  */
 #include "util/memorymap.h"
 #include "util/utils.h"
+#include "printk.h"
 
 __attribute__((optimize(0)))
 void delay(u64 cycles)

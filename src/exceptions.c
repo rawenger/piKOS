@@ -21,7 +21,7 @@
 #include "exceptions.h"
 #include "mmio.h"
 #include "printk.h"
-#include "peripherals/uart0.h"
+#include "peripherals/pl011_uart.h"
 #include "peripherals/mini_uart.h"
 
 static int_handler_t KOS_handlers[KOS_IRQ_NUM] = {NULL};

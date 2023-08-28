@@ -24,6 +24,12 @@
 
 #define BIT(bit)			(1 << (bit))
 
+#ifdef DEBUG
+#define LOG(...)     printk(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 #define enable_irq()                    do { asm volatile ("\tmsr daifclr, #2\n"); } while (0)
 #define disable_irq()                   do { asm volatile ("\tmsr daifset, #2\n"); } while (0)
 

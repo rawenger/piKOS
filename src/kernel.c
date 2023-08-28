@@ -21,11 +21,12 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "pikos_config.h"
 #include "mmio.h"
 #include "types.h"
 #include "kmalloc.h"
 #include "util/utils.h"
-#include "peripherals/uart0.h"
+#include "peripherals/pl011_uart.h"
 #include "peripherals/mini_uart.h"
 #include "util/memorymap.h"
 #include "vm_kernel.h"
@@ -46,7 +47,7 @@ static void SystemReboot(void)
         vmmio_write32(ARM_PM_RSTC, ARM_PM_PASSWD | PM_RSTC_WRCFG_FULL_RESET);
 }
 
-static void irq_init()
+static void irq_init(void)
 {
 	vmmio_write32(ARM_IC_FIQ_CONTROL, 0); // completely disable FIQ's -- Linux does not use them so neither will we
 	vmmio_write32(ARM_IC_DISABLE_IRQS_1, -1);
@@ -60,6 +61,22 @@ static void irq_init()
 	enable_irq();
 }
 
+static void peripheral_init(void)
+{
+	if (PIKOS_LOG_LINE)
+		uart_init(PIKOS_LOG_LINE, 0);
+	if (PIKOS_TTY0)
+		uart_init(PIKOS_TTY0, 1);
+	if (PIKOS_TTY1)
+		uart_init(PIKOS_TTY1, 1);
+	if (PIKOS_TTY2)
+		uart_init(PIKOS_TTY2, 1);
+	if (PIKOS_TTY3)
+		uart_init(PIKOS_TTY3, 1);
+	if (PIKOS_TTY4)
+		uart_init(PIKOS_TTY4, 1);
+}
+
 /* Initialize libraries, software layer stuff. Don't put driver code in here! */
 // TODO: rename this LOL
 static void init_stuff(void)
@@ -69,42 +86,47 @@ static void init_stuff(void)
 }
 
 extern void *kern_img_end;
-extern void get_read(void);
+
+#ifndef QEMU
+#define QEMU    0
+#else
+#undef QEMU
+#define QEMU    1
+#endif
 
 _Noreturn void kernel_main(void)
 {
 	delay(1000);
-#ifdef DEBUG
-//	muart_init();
-	uart0_init();
-	printk("entered kernel\r\n");
+	peripheral_init();
+
+	LOG("piKOS build " VERSION_STRING "\r\n");
+	LOG("%s Raspberry Pi %d, aarch%d\r\n",
+	    QEMU==0 ? "Bare-metal" : "QEMU", RASPPI, AARCH);
 	delay(1000);
-#endif
-        timer_init();
-	irq_init();
+//        timer_init();
+//	irq_init();
 
 	u64 el;
 	asm volatile ("\tmrs %0, CurrentEL\n"
 		      "\tlsr %0, %0, #2\n"
 		      : "=r" (el));
 	assert(el > 0);
-	printk("Running in EL %lu\r\n", el);
+	LOG("Running in EL %lu\r\n", el);
 
 	void *start = (void *) (KERN_VM_BASE | KERN_IMG_START_PHYS);
 
-	printk("kernel image vm_start: %p\r\n"
+	LOG("kernel image vm_start: %p\r\n"
 	       "kernel image vm_end: %p\r\n"
 	       "image size: 0x%lx\r\n",
 	       start, &kern_img_end, (void *) &kern_img_end - (void *) start);
 
-        delay(50000000);
+//        delay(50000000);
 //        delay(500000000);
-        disable_irq();
-        muart_init();
-        muart_send_str("PL011 read:\r\n");
-        get_read();
+//        disable_irq();
+//        muart_init();
+//        muart_send_str("PL011 read:\r\n");
+//        get_read();
 	while (1) {
-//                muart_send(muart_recv());
-//		uart0_send(uart0_recv());
+		uart_send(PIKOS_TTY0, uart_recv(PIKOS_TTY0));
 	}
 }

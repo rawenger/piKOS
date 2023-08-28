@@ -21,8 +21,14 @@
 #pragma once
 
 #include "peripherals/mini_uart.h"
-#include "peripherals/uart0.h"
-#define _putchar        muart_send
+#include "peripherals/pl011_uart.h"
+#include "pikos_config.h"
+
+#ifdef USE_MUART
+#define _putchar(c)     do { muart_send((c)); } while (0)
+#else
+#define _putchar(c)     do { uart_send(PIKOS_LOG_LINE, (c)); } while (0)
+#endif
 
 /* Disable floating point printing */
 #define PRINTK_DISABLE_SUPPORT_FLOAT

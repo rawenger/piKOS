@@ -43,11 +43,12 @@ typedef enum {
 
 struct GPIOPin {
 	u32 pin_num;
-	u32 reg_offset;
-	u32 reg_mask;
+	u32 _p_reg_offset;
+	u32 _p_reg_mask;
 	GPIOPinMode mode;
 };
 
 void GPIOPin_init(struct GPIOPin *pin, u32 pin_num, GPIOPinMode mode);
+struct GPIOPin GPIOPin_create(u32 pin_num, GPIOPinMode mode);
 void GPIOPin_write(struct GPIOPin *pin, BOOL val);
 BOOL GPIOPin_read(struct GPIOPin *pin);

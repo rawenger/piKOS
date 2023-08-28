@@ -169,7 +169,7 @@
 // TODO: go through datasheet and add in #define's for all the
 //   register bits. Haven't done that yet so the driver currently
 //   uses hardcoded hexadecimal literals.
-#define MUART_BASE     (MMIO_BASE + 0x00215000U)
+#define MUART_BASE     (GPIO_BASE + 0x15000U)
 #define MUART_EN        (MUART_BASE + 0x4)
 #define MUART_IO_REG    (MUART_BASE + 0x40)
 #define MUART_IER_REG   (MUART_BASE + 0x44)

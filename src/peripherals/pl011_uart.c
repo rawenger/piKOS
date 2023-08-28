@@ -18,10 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "pikos_config.h"
 #include "mmio.h"
 #include "exceptions.h"
 #include "util/utils.h"
-#include "peripherals/uart0.h"
+#include "peripherals/pl011_uart.h"
 #include "peripherals/gpio.h"
 #include "peripherals/mini_uart.h"
 
@@ -32,27 +33,78 @@
 #define IBRD_115200	        ((unsigned int)(BRD_115200))
 #define FBRD_115200	        ((unsigned int)(((BRD_115200-IBRD_115200)*64)+0.5))
 
-void uart0_init()
-{
-	struct GPIOPin Tx, Rx;
-	GPIOPin_init(&Tx, 14, GPIO_AF0);
-	GPIOPin_init(&Rx, 15, GPIO_AF0);
+#define UART0_GPIO_TX           14, GPIO_AF0
+#define UART0_GPIO_RX           15, GPIO_AF0
+/*
+ * Note: UART0 also supports Tx, Rx = 32, 33 on AF3 or Tx, Rx = 36, 37 on AF2
+ */
+#define UART1_GPIO_TX           0, GPIO_AF4
+#define UART1_GPIO_RX           1, GPIO_AF4
+#define UART2_GPIO_TX           4, GPIO_AF4
+#define UART2_GPIO_RX           5, GPIO_AF4
+#define UART3_GPIO_TX           8, GPIO_AF4
+#define UART3_GPIO_RX           9, GPIO_AF4
+#define UART4_GPIO_TX           12, GPIO_AF4
+#define UART4_GPIO_RX           13, GPIO_AF4
 
-	vmmio_write32(UART0_CR, 0); // disable
-	vmmio_write32(UART0_IBRD, IBRD_115200); // setup br 115200
-	vmmio_write32(UART0_FBRD, FBRD_115200);
-	vmmio_write32(UART0_LCRH, LCRH_WLEN8_MASK | LCRH_FEN_MASK); // set 8-bit word, enable fifo
+struct UART_GPIO {
+	struct pin {
+		int GPIO_num;
+		int AF_mode;
+	} Tx;
+	struct pin Rx;
+};
+
+static struct UART_GPIO GPIOs[] = {
+	{.Tx = {14, GPIO_AF0}, .Rx = {15, GPIO_AF0}},
+	{}, // <-- RESERVED
+#if RASPPI == 4
+        {.Tx = {0, GPIO_AF4},  .Rx = {1, GPIO_AF4}},
+	{.Tx = {4, GPIO_AF4},  .Rx = {5, GPIO_AF4}},
+	{.Tx = {8, GPIO_AF4},  .Rx = {9, GPIO_AF4}},
+	{.Tx = {12, GPIO_AF4}, .Rx = {13, GPIO_AF4}},
+#endif
+};
+
+void uart_init(uart_device dev, int enable_irq)
+{
+#ifdef USE_MUART
+	if (dev == MUART) {
+		muart_init();
+		return;
+	}
+#endif
+	struct GPIOPin Tx, Rx;
+	u64 uart_num = ((uintptr) dev - (uintptr) UART0) / 512;
+	GPIOPin_init(&Tx, GPIOs[uart_num].Tx.GPIO_num, GPIOs[uart_num].Tx.AF_mode);
+	GPIOPin_init(&Rx, GPIOs[uart_num].Rx.GPIO_num, GPIOs[uart_num].Rx.AF_mode);
+
+	ASSIGN_STRUCT(dev->CR, {0}); // disable
+
+	// setup baud rate
+	dev->IBRD = IBRD_115200;
+	dev->FBRD = FBRD_115200;
+
+	// set 8-bit word, enable FIFO
+	ASSIGN_STRUCT(dev->LCRH, {0});
+	dev->LCRH.WLEN = UART_LCRH_WLEN8;
+	dev->LCRH.FEN = 1;
 
 	// enable hardware flow control
-	vmmio_write32(UART0_CR, CR_CTSEN_MASK | CR_RTSEN_MASK);
+	dev->CR.CTSEN = 1;
+	dev->CR.RTSEN = 1;
 
 	// enable Tx & Rx interrupts
-	vmmio_write32(UART0_IMSC, IMSC_RXIM | IMSC_TXIM);
+	ASSIGN_STRUCT(dev->IMSC, {0});
+	dev->IMSC.RXIM = dev->IMSC.TXIM = 1;
+
 	// set Rx & Tx FIFO interrupt trigger levels to 1/8 full
-	vmmio_write32(UART0_IFLS, (IFLS_IFSEL_1_8 << IFLS_RXIFSEL_SHIFT) | (IFLS_IFSEL_1_8 << IFLS_TXIFSEL_SHIFT));
+	ASSIGN_STRUCT(dev->IFLS, {0});
+	dev->IFLS.RXIFSEL = UART_IFSEL_1_8;
+	dev->IFLS.TXIFSEL = UART_IFSEL_1_8;
 
 	// enable tx,rx
-	vmmio_write32(UART0_CR, CR_UART_EN_MASK | CR_TXE_MASK | CR_RXE_MASK);
+	dev->CR.EN = dev->CR.TXE = dev->CR.RXE = 1;
 }
 
 __attribute__((optimize(2)))
@@ -82,16 +134,16 @@ void uart0_irq_handler(void)
 #endif
 }
 
-void uart0_send(char c)
+void uart_send(uart_device dev, char c)
 {
-	while (vmmio_read32(UART0_FR) & FR_TXFF_MASK)
+	while (dev->FR.TXFF)
 		;
-	vmmio_write32(UART0_DR, c);
+	dev->DR = c;
 }
 
-char uart0_recv(void)
+char uart_recv(uart_device dev)
 {
-	while (vmmio_read32(UART0_FR) & FR_RXFE_MASK)
+	while (dev->FR.RXFE)
 		;
-	return vmmio_read32(UART0_DR);
+	return dev->DR;
 }
